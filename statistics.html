@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OctaStats — Statistics</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    .stat-table td:first-child { color: var(--text-secondary); font-family: var(--font-mono); font-size: 12px; }
+    .stat-table td:last-child  { text-align: right; font-family: var(--font-mono); font-size: 13px; font-weight: 500; }
+    .stat-table tr { border-bottom: 1px solid var(--border); }
+    .stat-table tr:last-child { border-bottom: none; }
+    .stat-table td { padding: 10px 16px; }
+    .ttest-result {
+      padding: 20px; border-radius: var(--radius);
+      display: flex; align-items: flex-start; gap: 16px;
+    }
+    .ttest-result.pass { background: rgba(34,197,94,0.06); border: 1px solid rgba(34,197,94,0.2); }
+    .ttest-result.fail { background: rgba(212,25,42,0.06);  border: 1px solid rgba(212,25,42,0.15); }
+    .ttest-icon  { font-size: 24px; flex-shrink: 0; }
+    .ttest-title { font-family: var(--font-display); font-size: 16px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
+    .ttest-desc  { color: var(--text-secondary); font-size: 13px; line-height: 1.6; }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="nav-brand" href="index.html">OctaStats</a>
+    <button class="nav-toggle">☰</button>
+    <div class="nav-links" style="display:flex;align-items:center;gap:4px;">
+      <a class="nav-link" href="index.html">Home</a>
+      <a class="nav-link" href="predictions.html">Predictions</a>
+      <a class="nav-link" href="results.html">Results</a>
+      <a class="nav-link active" href="statistics.html">Statistics</a>
+      <div class="nav-dropdown">
+        <a class="nav-link" href="#">V1 Model <span style="font-size:9px;opacity:0.6">▾</span></a>
+        <div class="nav-dropdown-menu">
+          <a href="v1/predictions.html">V1 Predictions</a>
+          <a href="v1/results.html">V1 Results</a>
+          <a href="v1/statistics.html">V1 Statistics</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<main class="page fade-in">
+  <div class="page-header">
+    <div class="page-eyebrow">V2 Model · Performance Analysis</div>
+    <h1 class="page-title">Statistics</h1>
+    <p class="page-subtitle" id="analysisDate">Loading…</p>
+  </div>
+
+  <div id="ttestResult" style="margin-bottom:32px;">
+    <div class="loading"><div class="spinner"></div></div>
+  </div>
+
+  <div id="topStats" class="stat-grid stagger" style="margin-bottom:40px;"></div>
+
+  <div class="grid-2" style="margin-bottom:32px;">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Monthly Net P&L (Units)</span></div>
+      <div class="card-body">
+        <div class="chart-container" style="height:220px;"><canvas id="monthlyChart"></canvas></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Model Calibration</span></div>
+      <div class="card-body">
+        <div class="chart-container" style="height:220px;"><canvas id="calibrationChart"></canvas></div>
+        <p style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted);margin-top:8px;text-align:center">
+          Ideal: predicted probability = actual win rate
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:32px;">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Descriptive Statistics (RTP Multiplier)</span></div>
+      <div id="basicStatsTable" class="card-body">
+        <div class="loading"><div class="spinner"></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Bet Size Distribution</span></div>
+      <div class="card-body">
+        <div class="chart-container" style="height:200px;"><canvas id="betSizeChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="card-title">Statistical Methodology</span></div>
+    <div class="card-body" style="color:var(--text-secondary);font-size:14px;line-height:1.7;display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+      <div>
+        <p style="margin-bottom:12px">
+          <strong style="color:var(--text-primary)">RTP (Return to Player)</strong> — profit multiplier metric.
+          A value of 1.20 means each unit bet returned 1.20 units (20% profit). Break-even after vig is 0.96.
+        </p>
+        <p>
+          <strong style="color:var(--text-primary)">One-Sample T-Test</strong> — Tests whether the model's
+          mean RTP is statistically greater than 0.96. H₀: mean RTP = 0.96. H₁: mean RTP > 0.96.
+          p &lt; 0.05 indicates the edge is unlikely due to chance.
+        </p>
+      </div>
+      <div>
+        <p style="margin-bottom:12px">
+          <strong style="color:var(--text-primary)">Calibration Chart</strong> — Predicted win probabilities
+          vs actual win rates per probability bucket. Perfect calibration lies on the diagonal.
+          Above diagonal = underconfident; below = overconfident.
+        </p>
+        <p>
+          <strong style="color:var(--text-primary)">Bounded Kelly Sizing</strong> — Bet sizes use a
+          logistic-transformed Kelly fraction. Units are continuous (0–5), never reaching 5.00u.
+          Confidence and odds structure both influence the final unit size.
+        </p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>OctaStats &copy; <span id="yr"></span></footer>
+
+<script src="assets/js/main.js"></script>
+<script>
+document.getElementById("yr").textContent = new Date().getFullYear();
+
+async function loadStats() {
+  const stats = await getV2Stats();
+
+  if (!stats || stats.error) {
+    document.getElementById("ttestResult").innerHTML = `
+      <div class="alert alert-warn">No statistical analysis available yet. Generated after the first completed event.</div>`;
+    document.getElementById("topStats").innerHTML = "";
+    document.getElementById("basicStatsTable").innerHTML = `<p style="color:var(--text-muted);font-family:var(--font-mono);font-size:12px">No data yet.</p>`;
+    return;
+  }
+
+  document.getElementById("analysisDate").textContent =
+    `Analysis updated: ${new Date(stats.analysis_date).toLocaleDateString("en-US", { year:"numeric", month:"long", day:"numeric" })}`;
+
+  // T-test banner
+  const ttest = stats.t_test || {};
+  const pass  = ttest.conclusion === "Reject H0";
+  const pval  = typeof ttest.p_value_one_sided === "number" ? ttest.p_value_one_sided.toFixed(4) : "—";
+  const tstat = typeof ttest.t_statistic       === "number" ? ttest.t_statistic.toFixed(3)       : "—";
+
+  document.getElementById("ttestResult").innerHTML = `
+    <div class="ttest-result ${pass ? "pass" : "fail"}">
+      <div class="ttest-icon">${pass ? "✓" : "–"}</div>
+      <div>
+        <div class="ttest-title">${pass ? "Model is Statistically Profitable" : "Insufficient Evidence of Profitability"}</div>
+        <div class="ttest-desc">
+          One-sided t-test vs break-even (H₀: RTP = 0.96) — p = ${pval} &nbsp;|&nbsp; t = ${tstat}.<br/>
+          ${pass
+            ? "We reject H₀ at the 5% level. The model's edge is statistically significant and unlikely to be due to variance."
+            : "We cannot yet reject H₀. More data or a larger consistent edge is needed to confirm profitability."}
+        </div>
+      </div>
+    </div>`;
+
+  // Top stat cards
+  const perf  = stats.overall_performance || {};
+  const basic = stats.basic_statistics    || {};
+  const netU  = typeof perf.net_units === "number" ? perf.net_units : 0;
+  const rtp   = typeof perf.rtp_pct   === "number" ? perf.rtp_pct  : 0;
+
+  document.getElementById("topStats").innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Total Bets</div>
+      <div class="stat-value">${perf.total_bets ?? basic.count ?? "—"}</div>
+      <div class="stat-sub">${perf.total_wins ?? "—"}W · ${perf.total_losses ?? "—"}L</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Win Rate</div>
+      <div class="stat-value">${typeof perf.win_rate_pct === "number" ? perf.win_rate_pct.toFixed(1) + "%" : "—"}</div>
+    </div>
+    <div class="stat-card ${netU >= 0 ? "positive" : "negative"}">
+      <div class="stat-label">Net P&amp;L</div>
+      <div class="stat-value">${netU >= 0 ? "+" : ""}${netU.toFixed ? netU.toFixed(2) : netU}u</div>
+    </div>
+    <div class="stat-card ${rtp >= 96 ? "positive" : "negative"}">
+      <div class="stat-label">RTP</div>
+      <div class="stat-value">${rtp.toFixed ? rtp.toFixed(1) + "%" : "—"}</div>
+      <div class="stat-sub">Break-even: 96%</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Mean RTP Mult.</div>
+      <div class="stat-value">${typeof basic.mean === "number" ? basic.mean.toFixed(3) : "—"}</div>
+      <div class="stat-sub">Median: ${typeof basic.median === "number" ? basic.median.toFixed(3) : "—"}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Units Staked</div>
+      <div class="stat-value">${typeof perf.units_staked === "number" ? perf.units_staked.toFixed(1) : "—"}u</div>
+    </div>
+  `;
+
+  // Basic stats table
+  if (basic && Object.keys(basic).length) {
+    const rows = [
+      ["Count",    basic.count],
+      ["Mean RTP", typeof basic.mean   === "number" ? basic.mean.toFixed(4)   : "—"],
+      ["Median",   typeof basic.median === "number" ? basic.median.toFixed(4) : "—"],
+      ["Std Dev",  typeof basic.std    === "number" ? basic.std.toFixed(4)    : "—"],
+      ["Min",      typeof basic.min    === "number" ? basic.min.toFixed(4)    : "—"],
+      ["Max",      typeof basic.max    === "number" ? basic.max.toFixed(4)    : "—"],
+      ["Range",    typeof basic.range  === "number" ? basic.range.toFixed(4)  : "—"],
+      ["IQR",      typeof basic.iqr    === "number" ? basic.iqr.toFixed(4)    : "—"],
+    ];
+    document.getElementById("basicStatsTable").innerHTML = `
+      <table class="stat-table" style="width:100%">
+        <tbody>${rows.map(([k,v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join("")}</tbody>
+      </table>`;
+  }
+
+  // Monthly P&L chart
+  const monthly = stats.monthly_performance || [];
+  if (monthly.length) {
+    const labels  = monthly.map(m => m.month);
+    const netData = monthly.map(m => parseFloat(m.net_units || 0));
+    const colors  = netData.map(v => v >= 0 ? "rgba(34,197,94,0.7)" : "rgba(212,25,42,0.7)");
+
+    new Chart(document.getElementById("monthlyChart").getContext("2d"), {
+      type: "bar",
+      data: { labels, datasets: [{ data: netData, backgroundColor: colors, borderRadius: 2 }] },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: "#18181e", borderColor: "#2a2a38", borderWidth: 1,
+            titleFont: { family: "IBM Plex Mono", size: 10 },
+            bodyFont:  { family: "IBM Plex Mono", size: 11 },
+            callbacks: { label: c => `${c.raw >= 0 ? "+" : ""}${parseFloat(c.raw).toFixed(2)}u` },
+          },
+        },
+        scales: {
+          x: { grid: { color:"#1e1e28" }, ticks: { color:"#484860", font:{ family:"IBM Plex Mono", size:9 } } },
+          y: { grid: { color:"#1e1e28" }, ticks: { color:"#8888a0", font:{ family:"IBM Plex Mono", size:10 },
+               callback: v => (v >= 0 ? "+" : "") + v.toFixed(1) + "u" } },
+        },
+      },
+    });
+  } else {
+    document.getElementById("monthlyChart").parentElement.innerHTML =
+      `<div class="chart-placeholder">No monthly data yet</div>`;
+  }
+
+  // Calibration chart
+  const cal = stats.calibration || [];
+  if (cal.length) {
+    const calLabels   = cal.map(c => c.prob_bucket);
+    const actualRates = cal.map(c => parseFloat(c.actual_win_rate || 0) * 100);
+    const predictedR  = cal.map(c => parseFloat(c.avg_predicted   || 0) * 100);
+
+    new Chart(document.getElementById("calibrationChart").getContext("2d"), {
+      type: "bar",
+      data: {
+        labels: calLabels,
+        datasets: [
+          { label: "Actual Win %",    data: actualRates, backgroundColor: "rgba(34,197,94,0.6)", borderRadius: 2 },
+          { label: "Predicted Win %", data: predictedR,  backgroundColor: "rgba(59,130,246,0.4)", borderRadius: 2 },
+        ],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { labels: { color: "#8888a0", font: { family: "IBM Plex Mono", size: 10 } } },
+          tooltip: { backgroundColor:"#18181e", borderColor:"#2a2a38", borderWidth:1,
+            titleFont:{ family:"IBM Plex Mono", size:10 }, bodyFont:{ family:"IBM Plex Mono", size:11 } },
+        },
+        scales: {
+          x: { grid:{ color:"#1e1e28" }, ticks:{ color:"#484860", font:{ family:"IBM Plex Mono", size:9 } } },
+          y: { grid:{ color:"#1e1e28" }, ticks:{ color:"#8888a0", font:{ family:"IBM Plex Mono", size:10 },
+               callback: v => v.toFixed(0) + "%" }, max: 100, min: 0 },
+        },
+      },
+    });
+  } else {
+    document.getElementById("calibrationChart").parentElement.innerHTML =
+      `<div class="chart-placeholder">Calibration data available after sufficient bets</div>`;
+  }
+
+  // Bet size distribution chart
+  const bsd = stats.bet_size_distribution?.units_by_bucket || {};
+  if (Object.keys(bsd).length) {
+    new Chart(document.getElementById("betSizeChart").getContext("2d"), {
+      type: "bar",
+      data: {
+        labels: Object.keys(bsd),
+        datasets: [{ data: Object.values(bsd), backgroundColor: "rgba(212,25,42,0.55)", borderRadius: 2 }],
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend:{ display:false } },
+        scales: {
+          x: { grid:{ color:"#1e1e28" }, ticks:{ color:"#8888a0", font:{ family:"IBM Plex Mono", size:10 } } },
+          y: { grid:{ color:"#1e1e28" }, ticks:{ color:"#8888a0", font:{ family:"IBM Plex Mono", size:10 }, stepSize:1 } },
+        },
+      },
+    });
+  } else {
+    document.getElementById("betSizeChart").parentElement.innerHTML =
+      `<div class="chart-placeholder">No bet data yet</div>`;
+  }
+}
+
+loadStats();
+</script>
+</body>
+</html>

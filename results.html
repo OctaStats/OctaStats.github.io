@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OctaStats — Results</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="nav-brand" href="index.html">OctaStats</a>
+    <button class="nav-toggle">☰</button>
+    <div class="nav-links" style="display:flex;align-items:center;gap:4px;">
+      <a class="nav-link" href="index.html">Home</a>
+      <a class="nav-link" href="predictions.html">Predictions</a>
+      <a class="nav-link active" href="results.html">Results</a>
+      <a class="nav-link" href="statistics.html">Statistics</a>
+      <div class="nav-dropdown">
+        <a class="nav-link" href="#">V1 Model <span style="font-size:9px;opacity:0.6">▾</span></a>
+        <div class="nav-dropdown-menu">
+          <a href="v1/predictions.html">V1 Predictions</a>
+          <a href="v1/results.html">V1 Results</a>
+          <a href="v1/statistics.html">V1 Statistics</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<main class="page fade-in">
+
+  <div class="page-header">
+    <div class="page-eyebrow">V2 Model · Betting History</div>
+    <h1 class="page-title">Results</h1>
+    <p class="page-subtitle">Track record of all V2 model predictions</p>
+  </div>
+
+  <!-- Performance stats grid -->
+  <div id="statsGrid" class="stat-grid stagger" style="margin-bottom:40px;">
+    <div class="loading"><div class="spinner"></div></div>
+  </div>
+
+  <!-- Tabs: recent event / all results -->
+  <div class="tab-bar">
+    <div class="tab active" id="tabRecent" onclick="switchTab('recent')">Recent Event</div>
+    <div class="tab" id="tabAll" onclick="switchTab('all')">All Results</div>
+  </div>
+
+  <!-- Results table -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title" id="tableTitle">Recent Event</span>
+      <div style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted)" id="tableSubtitle"></div>
+    </div>
+    <div id="resultsTable">
+      <div class="loading"><div class="spinner"></div> Loading results…</div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  OctaStats &copy; <span id="yr"></span>
+</footer>
+
+<script src="assets/js/main.js"></script>
+<script>
+document.getElementById("yr").textContent = new Date().getFullYear();
+
+let recentRows = [], allRows = [], currentTab = "recent";
+
+async function loadResults() {
+  const [titles, all] = await Promise.all([getFightTitles(), getV2AllResults()]);
+
+  const recentEvent = titles.recent_event || titles.recent || "";
+  allRows = all;
+
+  // Filter recent event rows
+  recentRows = all.filter(r =>
+    r.event_name && recentEvent &&
+    (r.event_name === recentEvent ||
+     r.event_name.includes(recentEvent.split(":")[0]?.trim() || ""))
+  );
+
+  // Stats for all bets
+  const bet_all    = allRows.filter(r => parseFloat(r.bet_size) > 0);
+  const bet_recent = recentRows.filter(r => parseFloat(r.bet_size) > 0);
+  const m_all    = calcMetrics(allRows);
+  const m_recent = calcMetrics(recentRows);
+
+  const allNet    = parseFloat(m_all.net_units);
+  const recentNet = parseFloat(m_recent.net_units);
+
+  document.getElementById("statsGrid").innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">All-Time Bets</div>
+      <div class="stat-value">${m_all.total_bets}</div>
+      <div class="stat-sub">${m_all.winning_bets}W · ${m_all.losing_bets}L</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Win Rate</div>
+      <div class="stat-value">${m_all.win_rate}%</div>
+    </div>
+    <div class="stat-card ${allNet >= 0 ? 'positive' : 'negative'}">
+      <div class="stat-label">Net P&amp;L (All-Time)</div>
+      <div class="stat-value">${allNet >= 0 ? '+' : ''}${m_all.net_units}u</div>
+    </div>
+    <div class="stat-card ${parseFloat(m_all.rtp) >= 96 ? 'positive' : 'negative'}">
+      <div class="stat-label">All-Time RTP</div>
+      <div class="stat-value">${m_all.rtp}%</div>
+      <div class="stat-sub">Break-even: 96%</div>
+    </div>
+    <div class="stat-card ${recentNet >= 0 ? 'positive' : 'negative'}">
+      <div class="stat-label">Recent Event Net</div>
+      <div class="stat-value">${recentNet >= 0 ? '+' : ''}${m_recent.net_units}u</div>
+      <div class="stat-sub">${recentEvent ? recentEvent.replace("UFC ", "") : "—"}</div>
+    </div>
+  `;
+
+  renderTable(currentTab === "recent" ? recentRows : allRows, currentTab);
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById("tabRecent").classList.toggle("active", tab === "recent");
+  document.getElementById("tabAll").classList.toggle("active", tab === "all");
+  renderTable(tab === "recent" ? recentRows : allRows, tab);
+}
+
+function renderTable(rows, tab) {
+  const bet_rows = rows.filter(r => parseFloat(r.bet_size) > 0);
+  const label    = tab === "recent" ? "Recent Event" : "All Results";
+
+  document.getElementById("tableTitle").textContent    = label;
+  document.getElementById("tableSubtitle").textContent = `${bet_rows.length} bets placed`;
+
+  if (bet_rows.length === 0) {
+    document.getElementById("resultsTable").innerHTML = `
+      <div class="alert alert-info" style="margin:20px;">
+        No results data available${tab === "recent" ? " for the most recent event" : ""} yet.
+      </div>`;
+    return;
+  }
+
+  const sorted = [...bet_rows].sort((a, b) =>
+    (a.event_name || "").localeCompare(b.event_name || "") ||
+    (a.name || "").localeCompare(b.name || "")
+  );
+
+  let html = `
+    <div class="table-wrap">
+      <table id="resultsTableEl">
+        <thead>
+          <tr>
+            <th data-sort="name">Fighter</th>
+            ${tab === "all" ? '<th data-sort="event">Event</th>' : ""}
+            <th data-sort="style">Style</th>
+            <th data-sort="odds">Odds</th>
+            <th data-sort="predicted">Pred %</th>
+            <th data-sort="edge">Edge</th>
+            <th data-sort="bet">Bet Size</th>
+            <th data-sort="result">Result</th>
+            <th data-sort="net">Net P&L</th>
+          </tr>
+        </thead>
+        <tbody>`;
+
+  sorted.forEach(r => {
+    const won    = r.won === "1" || r.won === 1;
+    const net    = parseFloat(r.net || 0);
+    const edge   = parseFloat(r.betting_edge || 0);
+    const style  = r.career_style || "";
+    const ifStyle = r.predicted_infight_style || "";
+
+    html += `
+      <tr>
+        <td class="td-name">${r.name || r.fighter || "—"}</td>
+        ${tab === "all" ? `<td style="color:var(--text-secondary);font-size:13px">${(r.event_name||"").replace("UFC ","")}</td>` : ""}
+        <td>${style ? styleBadge(style) : "—"}
+            ${ifStyle && ifStyle !== style ? `<br/>${styleBadge(ifStyle, true)}` : ""}</td>
+        <td class="td-mono">${fmtOdds(r.odds_numeric)}</td>
+        <td class="td-mono">${fmtPct(r.predicted_probability)}</td>
+        <td class="${edgeClass(edge)}">${(edge * 100).toFixed(1)}%</td>
+        <td class="td-mono" style="color:var(--red)">${parseFloat(r.bet_size).toFixed(2)}u</td>
+        <td><span class="badge ${won ? 'badge-won' : 'badge-lost'}">${won ? "WON" : "LOST"}</span></td>
+        <td class="${net > 0 ? 'td-positive' : net < 0 ? 'td-negative' : 'td-neutral'}">${fmtPnL(net)}</td>
+      </tr>`;
+  });
+
+  html += `</tbody></table></div>`;
+  document.getElementById("resultsTable").innerHTML = html;
+  makeSortable(document.getElementById("resultsTableEl"));
+}
+
+loadResults();
+</script>
+</body>
+</html>
