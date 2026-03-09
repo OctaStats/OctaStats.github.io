@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Statistics - OctaStats</title>
+  <meta name="description" content="OctaStats V2 model statistical analysis." />
+  <meta name="theme-color" content="#09090c" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <script src="assets/js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+
+<nav class="nav" role="navigation">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-brand"><span class="nav-brand-dot"></span>OctaStats</a>
+    <div class="nav-links">
+      <a href="index.html"       class="nav-link">Home</a>
+      <a href="predictions.html" class="nav-link">Predictions</a>
+      <a href="results.html"     class="nav-link">Results</a>
+      <a href="statistics.html"  class="nav-link active">Statistics</a>
+    </div>
+    <div class="nav-v1-toggle" role="button" tabindex="0">
+      <span class="nav-v1-toggle-option opt-v2 active-opt">V2</span>
+      <span class="nav-v1-toggle-option opt-v1">V1</span>
+    </div>
+    <div class="theme-toggle-slider" role="button" tabindex="0">
+      <span class="theme-toggle-option opt-dark active-opt">&#9790;</span>
+      <span class="theme-toggle-option opt-light">&#9728;</span>
+    </div>
+    <button class="nav-hamburger" aria-label="Open menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="nav-mobile-menu">
+  <a href="index.html"       class="nav-link">Home</a>
+  <a href="predictions.html" class="nav-link">Predictions</a>
+  <a href="results.html"     class="nav-link">Results</a>
+  <a href="statistics.html"  class="nav-link active">Statistics</a>
+  <div class="nav-mobile-controls">
+    <span class="nav-mobile-label">Model</span>
+    <div class="nav-v1-toggle" style="cursor:pointer;">
+      <span class="nav-v1-toggle-option opt-v2 active-opt">V2</span>
+      <span class="nav-v1-toggle-option opt-v1">V1</span>
+    </div>
+    <span class="nav-mobile-label" style="margin-left:12px;">Theme</span>
+    <div class="theme-toggle-slider" style="cursor:pointer;">
+      <span class="theme-toggle-option opt-dark active-opt">&#9790;</span>
+      <span class="theme-toggle-option opt-light">&#9728;</span>
+    </div>
+  </div>
+</div>
+
+<main class="page">
+  <div class="page-header">
+    <div class="page-eyebrow">V2 Model</div>
+    <h1 class="page-title">Statistical Analysis</h1>
+    <p class="page-subtitle">Model calibration, monthly performance, and hypothesis testing</p>
+  </div>
+  <div id="stats-loading" class="loading"><div class="spinner"></div>Loading statistics...</div>
+  <div id="stats-content" style="display:none;">
+    <div class="stat-grid stagger mb-24">
+      <div class="stat-card accent"><div class="stat-label">Model AUC</div><div class="stat-value" id="st-auc">--</div><div class="stat-sub">5-fold CV</div></div>
+      <div class="stat-card" id="st-rtp-card"><div class="stat-label">All-time RTP</div><div class="stat-value" id="st-rtp">--</div></div>
+      <div class="stat-card"><div class="stat-label">Win Rate</div><div class="stat-value" id="st-wr">--</div><div class="stat-sub" id="st-wr-sub">--</div></div>
+      <div class="stat-card" id="st-net-card"><div class="stat-label">Net Units</div><div class="stat-value" id="st-net">--</div></div>
+      <div class="stat-card"><div class="stat-label">Avg Bet Size</div><div class="stat-value" id="st-avgbet">--</div><div class="stat-sub">units</div></div>
+      <div class="stat-card"><div class="stat-label">Total Events</div><div class="stat-value" id="st-events">--</div></div>
+    </div>
+    <div class="grid-2 mb-24">
+      <div class="card"><div class="card-header"><span class="card-title">Monthly P&amp;L (Net Units)</span></div><div class="card-body"><div class="chart-wrap"><canvas id="chart-monthly"></canvas></div></div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Model Calibration</span></div><div class="card-body"><div class="chart-wrap"><canvas id="chart-cal"></canvas></div></div></div>
+    </div>
+    <div class="grid-2 mb-24">
+      <div class="ttest-box">
+        <div class="card-title" style="margin-bottom:12px;">Hypothesis Test</div>
+        <p style="font-family:var(--font-mono);font-size:11px;color:var(--text-secondary);margin-bottom:14px;line-height:1.6;">H0: Mean profit multiplier = 0.96 (break-even after vig)<br>H1: Mean profit multiplier &gt; 0.96 (model generates edge)</p>
+        <div class="ttest-result" id="ttest-conclusion">--</div>
+        <div class="ttest-row"><span class="ttest-row-label">T-statistic</span><span class="ttest-row-val" id="ttest-t">--</span></div>
+        <div class="ttest-row"><span class="ttest-row-label">p-value (one-sided)</span><span class="ttest-row-val" id="ttest-p">--</span></div>
+        <div class="ttest-row"><span class="ttest-row-label">Significance</span><span class="ttest-row-val" id="ttest-sig">--</span></div>
+        <div class="ttest-row"><span class="ttest-row-label">Sample size</span><span class="ttest-row-val" id="ttest-n">--</span></div>
+      </div>
+      <div class="card"><div class="card-header"><span class="card-title">Bet Size Distribution</span></div><div class="card-body"><div class="chart-wrap"><canvas id="chart-betsize"></canvas></div></div></div>
+    </div>
+    <h2 class="section-title">Monthly Performance</h2>
+    <div class="card mb-24">
+      <div class="table-wrap">
+        <table><thead><tr><th>Month</th><th>Bets</th><th>Win Rate</th><th>Staked</th><th>Net Units</th><th>RTP</th></tr></thead>
+        <tbody id="monthly-tbody"><tr><td colspan="6" class="alert-empty">Loading...</td></tr></tbody></table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer><p>OctaStats &nbsp;&middot;&nbsp; Data: UFCStats.com &nbsp;&middot;&nbsp; Odds: BestFightOdds.com</p></footer>
+
+<!-- V1 Overlay -->
+<div class="v1-overlay" id="v1-overlay">
+  <div class="v1-nav">
+    <div class="v1-nav-inner">
+      <span class="v1-brand"><span class="v1-brand-dot"></span>OctaStats</span>
+      <button class="v1-nav-link active" data-panel="statistics"  onclick="showV1Panel('statistics')">Statistics</button>
+      <button class="v1-nav-link"        data-panel="predictions" onclick="showV1Panel('predictions')">Predictions</button>
+      <button class="v1-nav-link"        data-panel="results"     onclick="showV1Panel('results')">Results</button>
+      <div class="theme-toggle-slider" style="cursor:pointer;margin-left:auto;">
+        <span class="theme-toggle-option opt-dark active-opt">&#9790;</span>
+        <span class="theme-toggle-option opt-light">&#9728;</span>
+      </div>
+      <button class="v1-back-btn v1-close-btn">&#8592; Back to V2</button>
+    </div>
+  </div>
+  <div style="max-width:var(--page-max);margin:0 auto;padding:0 var(--page-pad);">
+    <div class="v1-subnav">
+      <button class="v1-subnav-tab"        data-panel="predictions" onclick="showV1Panel('predictions')">Predictions</button>
+      <button class="v1-subnav-tab"         data-panel="results"     onclick="showV1Panel('results')">Results</button>
+      <button class="v1-subnav-tab active"  data-panel="statistics"  onclick="showV1Panel('statistics')">Statistics</button>
+    </div>
+  </div>
+  <div class="v1-page v1-panel" data-panel="predictions" style="display:none;">
+    <div class="page-header"><div class="page-eyebrow">V1 Legacy Model</div><h1 class="page-title" style="color:var(--text-secondary);">V1 Predictions</h1></div>
+    <div class="stat-grid stagger mb-20" style="grid-template-columns:repeat(auto-fit,minmax(110px,1fr));">
+      <div class="stat-card"><div class="stat-label">Fights</div><div class="stat-value" id="v1p-fights">--</div></div>
+      <div class="stat-card"><div class="stat-label">Bets</div><div class="stat-value" id="v1p-bets">--</div></div>
+      <div class="stat-card"><div class="stat-label">Units</div><div class="stat-value" id="v1p-units">--</div></div>
+    </div>
+    <div class="filter-bar">
+      <button class="btn btn-outline active" id="v1pf-all" onclick="v1PredFilter('all')">All</button>
+      <button class="btn btn-outline" id="v1pf-bets" onclick="v1PredFilter('bets')">Bets Only</button>
+    </div>
+    <div id="v1-pred-container"><div class="loading"><div class="spinner"></div>Loading...</div></div>
+  </div>
+  <div class="v1-page v1-panel" data-panel="results" style="display:none;">
+    <div class="page-header"><div class="page-eyebrow">V1 Legacy Model</div><h1 class="page-title" style="color:var(--text-secondary);">V1 Results</h1></div>
+    <div class="stat-grid stagger mb-24">
+      <div class="stat-card"><div class="stat-label">Total Bets</div><div class="stat-value" id="v1r-bets">--</div><div class="stat-sub" id="v1r-wl">--</div></div>
+      <div class="stat-card" id="v1r-wr-card"><div class="stat-label">Win Rate</div><div class="stat-value" id="v1r-wr">--</div></div>
+      <div class="stat-card" id="v1r-rtp-card"><div class="stat-label">RTP</div><div class="stat-value" id="v1r-rtp">--</div></div>
+      <div class="stat-card" id="v1r-net-card"><div class="stat-label">Net Units</div><div class="stat-value" id="v1r-net">--</div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">All V1 Bets</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);" id="v1r-count"></span></div>
+      <div class="table-wrap"><table id="v1r-table"><thead><tr><th data-sort="name">Fighter</th><th>Opponent</th><th>Result</th><th data-sort="Odds">Odds</th><th data-sort="bet_size">Bet</th><th data-sort="net">P&amp;L</th><th>Event</th></tr></thead><tbody id="v1r-tbody"><tr><td colspan="7" class="alert-empty">Loading...</td></tr></tbody></table></div>
+    </div>
+  </div>
+  <div class="v1-page v1-panel" data-panel="statistics">
+    <div class="page-header"><div class="page-eyebrow">V1 Legacy Model</div><h1 class="page-title" style="color:var(--text-secondary);">V1 Statistical Analysis</h1><p class="page-subtitle">Legacy model performance</p></div>
+    <div id="v1s-loading" class="loading"><div class="spinner"></div>Loading V1 statistics...</div>
+    <div id="v1s-content" style="display:none;">
+      <div class="stat-grid stagger mb-24">
+        <div class="stat-card" id="v1s-rtp-card"><div class="stat-label">All-time RTP</div><div class="stat-value" id="v1s-rtp">--</div></div>
+        <div class="stat-card" id="v1s-wr-card"><div class="stat-label">Win Rate</div><div class="stat-value" id="v1s-wr">--</div><div class="stat-sub" id="v1s-wr-sub">--</div></div>
+        <div class="stat-card" id="v1s-net-card"><div class="stat-label">Net Units</div><div class="stat-value" id="v1s-net">--</div></div>
+        <div class="stat-card"><div class="stat-label">Avg Bet</div><div class="stat-value" id="v1s-avgbet">--</div><div class="stat-sub">units</div></div>
+      </div>
+      <div class="grid-2 mb-24">
+        <div class="card"><div class="card-header"><span class="card-title">Monthly P&amp;L</span></div><div class="card-body"><div class="chart-wrap"><canvas id="v1s-chart-monthly"></canvas></div></div></div>
+        <div class="ttest-box">
+          <div class="card-title" style="margin-bottom:12px;">Hypothesis Test</div>
+          <p style="font-family:var(--font-mono);font-size:11px;color:var(--text-secondary);margin-bottom:14px;line-height:1.6;">H0: Break-even after vig<br>H1: Model generates edge</p>
+          <div class="ttest-result" id="v1s-ttest-conclusion">--</div>
+          <div class="ttest-row"><span class="ttest-row-label">T-statistic</span><span class="ttest-row-val" id="v1s-ttest-t">--</span></div>
+          <div class="ttest-row"><span class="ttest-row-label">p-value</span><span class="ttest-row-val" id="v1s-ttest-p">--</span></div>
+          <div class="ttest-row"><span class="ttest-row-label">Significance</span><span class="ttest-row-val" id="v1s-ttest-sig">--</span></div>
+          <div class="ttest-row"><span class="ttest-row-label">Sample size</span><span class="ttest-row-val" id="v1s-ttest-n">--</span></div>
+        </div>
+      </div>
+      <h2 class="section-title">Monthly Breakdown</h2>
+      <div class="card mb-24"><div class="table-wrap"><table><thead><tr><th>Month</th><th>Bets</th><th>Win Rate</th><th>Staked</th><th>Net Units</th><th>RTP</th></tr></thead><tbody id="v1s-monthly-tbody"><tr><td colspan="6" class="alert-empty">Loading...</td></tr></tbody></table></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+function chartDefaults(){var d=document.documentElement.getAttribute("data-theme")!=="light";return{gridColor:d?"rgba(255,255,255,0.05)":"rgba(0,0,0,0.06)",textColor:d?"#3e3e54":"#9494ac",tooltipBg:d?"#18181f":"#fff",tooltipText:d?"#eeeef6":"#111118",font:"'IBM Plex Mono',monospace"};}
+
+(async function(){
+  var stats=await getV2Stats();
+  document.getElementById("stats-loading").style.display="none";
+  if(!stats||stats.error){document.getElementById("stats-content").innerHTML='<div class="alert alert-info">No statistics data available yet.</div>';document.getElementById("stats-content").style.display="block";return;}
+  document.getElementById("stats-content").style.display="block";
+  var perf=stats.overall_performance||{},bs=stats.basic_statistics||{},tt=stats.t_test||{},cal=stats.calibration||[],mon=stats.monthly_performance||[],bsd=stats.bet_size_distribution||{};
+  var el=function(id){return document.getElementById(id);};
+  var cv=stats.model_cv_auc;if(cv&&el("st-auc"))el("st-auc").textContent=parseFloat(cv).toFixed(3);
+  if(perf.rtp_pct!==undefined&&el("st-rtp")){el("st-rtp").textContent=parseFloat(perf.rtp_pct).toFixed(1)+"%";el("st-rtp-card").classList.add(parseFloat(perf.rtp_pct)>=100?"positive":"negative");}
+  if(perf.win_rate_pct!==undefined&&el("st-wr")){el("st-wr").textContent=parseFloat(perf.win_rate_pct).toFixed(1)+"%";el("st-wr-sub")&&(el("st-wr-sub").textContent=(perf.total_wins||0)+"W / "+(perf.total_losses||0)+"L");}
+  if(perf.net_units!==undefined&&el("st-net")){var n=parseFloat(perf.net_units);el("st-net").textContent=(n>=0?"+":"")+n.toFixed(2);el("st-net-card").classList.add(n>=0?"positive":"negative");}
+  if(bsd.mean_units&&el("st-avgbet"))el("st-avgbet").textContent=parseFloat(bsd.mean_units).toFixed(2);
+  if(mon.length&&el("st-events"))el("st-events").textContent=mon.length;
+  if(tt.conclusion&&el("ttest-conclusion")){var pass=tt.conclusion==="Reject H0";el("ttest-conclusion").textContent=pass?"Edge Detected":"No Significant Edge";el("ttest-conclusion").className="ttest-result "+(pass?"pass":"fail");el("ttest-t")&&(el("ttest-t").textContent=fmt(tt.t_statistic,3));el("ttest-p")&&(el("ttest-p").textContent=fmt(tt.p_value_one_sided,4));el("ttest-sig")&&(el("ttest-sig").textContent=parseFloat(tt.p_value_one_sided)<0.05?"p < 0.05":"p >= 0.05");el("ttest-n")&&(el("ttest-n").textContent=bs.count||"--");}
+  var tbody=el("monthly-tbody");
+  if(mon.length&&tbody){tbody.innerHTML=mon.slice().reverse().map(function(m){var n=parseFloat(m.net_units||0);return'<tr><td class="td-mono">'+m.month+'</td><td class="td-mono">'+m.bets+'</td><td class="td-mono">'+fmt(m.win_rate,1)+'%</td><td class="td-mono">'+fmt(m.units_staked,2)+'u</td><td class="'+pnlClass(n)+'">'+fmtPnL(n)+'</td><td class="td-mono '+(parseFloat(m.rtp)>=100?'td-positive':'td-negative')+'">'+fmt(m.rtp,1)+'%</td></tr>';}).join("");}
+  else if(tbody){tbody.innerHTML='<tr><td colspan="6" class="alert-empty">No monthly data yet</td></tr>';}
+  var cd=chartDefaults();
+  if(mon.length&&el("chart-monthly")){new Chart(el("chart-monthly").getContext("2d"),{type:"bar",data:{labels:mon.map(function(m){return m.month;}),datasets:[{label:"Net Units",data:mon.map(function(m){return parseFloat(m.net_units||0);}),backgroundColor:mon.map(function(m){return parseFloat(m.net_units||0)>=0?"rgba(34,197,94,0.65)":"rgba(212,25,42,0.65)";}),borderRadius:2}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{backgroundColor:cd.tooltipBg,bodyColor:cd.tooltipText,titleColor:cd.tooltipText,callbacks:{label:function(c){return(c.parsed.y>=0?"+":"")+c.parsed.y.toFixed(2)+"u";}}}},scales:{x:{ticks:{color:cd.textColor,font:{family:cd.font,size:10}},grid:{color:cd.gridColor}},y:{ticks:{color:cd.textColor,font:{family:cd.font,size:10},callback:function(v){return(v>=0?"+":"")+v.toFixed(1)+"u";}},grid:{color:cd.gridColor}}}}});}
+  if(cal.length&&el("chart-cal")){new Chart(el("chart-cal").getContext("2d"),{type:"bar",data:{labels:cal.map(function(c){return c.prob_bucket;}),datasets:[{label:"Predicted",data:cal.map(function(c){return parseFloat(c.avg_predicted||0)*100;}),backgroundColor:"rgba(59,130,246,0.5)",borderColor:"rgba(59,130,246,0.9)",borderWidth:1,borderRadius:2},{label:"Actual Win %",data:cal.map(function(c){return parseFloat(c.actual_win_rate||0)*100;}),backgroundColor:"rgba(212,25,42,0.5)",borderColor:"rgba(212,25,42,0.9)",borderWidth:1,borderRadius:2}]},options:{responsive:true,plugins:{legend:{labels:{color:cd.textColor,font:{family:cd.font,size:10}}},tooltip:{backgroundColor:cd.tooltipBg,bodyColor:cd.tooltipText,titleColor:cd.tooltipText,callbacks:{label:function(c){return c.dataset.label+": "+c.parsed.y.toFixed(1)+"%";}}}},scales:{x:{ticks:{color:cd.textColor,font:{family:cd.font,size:10}},grid:{color:cd.gridColor}},y:{ticks:{color:cd.textColor,font:{family:cd.font,size:10},callback:function(v){return v+"%";}},grid:{color:cd.gridColor}}}}});}
+  if(bsd.units_by_bucket&&el("chart-betsize")){var b=bsd.units_by_bucket;new Chart(el("chart-betsize").getContext("2d"),{type:"bar",data:{labels:["<1u","1-2u","2-3u","3-4u","4-5u"],datasets:[{label:"Count",data:[b["0-1"]||0,b["1-2"]||0,b["2-3"]||0,b["3-4"]||0,b["4-5"]||0],backgroundColor:"rgba(212,25,42,0.6)",borderColor:"rgba(212,25,42,0.9)",borderWidth:1,borderRadius:2}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{backgroundColor:cd.tooltipBg,bodyColor:cd.tooltipText,titleColor:cd.tooltipText}},scales:{x:{ticks:{color:cd.textColor,font:{family:cd.font,size:10}},grid:{color:cd.gridColor}},y:{ticks:{color:cd.textColor,font:{family:cd.font,size:10}},grid:{color:cd.gridColor}}}}});}
+})();
+
+var _v1PredsAll=[],_v1PredFilter='all',_v1ChartBuilt=false;
+function initV1OverlayContent(){loadV1Predictions();loadV1Results();loadV1Statistics();}
+
+async function loadV1Predictions(){
+  var preds=await getV1Predictions(),c=document.getElementById("v1-pred-container");
+  if(!preds||!preds.length){if(c)c.innerHTML='<div class="no-event"><div class="no-event-icon">&#x1F94A;</div><div class="no-event-title">No V1 Predictions Posted</div></div>';return;}
+  _v1PredsAll=preds;
+  var matchups=new Set(preds.map(function(r){return[r.fighter||r.name,r.opponent].sort().join("__");}));
+  var bets=preds.filter(function(r){return parseFloat(r.bet_size||r.units||0)>0;});
+  var totalU=bets.reduce(function(s,r){return s+parseFloat(r.bet_size||r.units||0);},0);
+  var el=function(id){return document.getElementById(id);};
+  if(el("v1p-fights"))el("v1p-fights").textContent=matchups.size;
+  if(el("v1p-bets"))el("v1p-bets").textContent=bets.length;
+  if(el("v1p-units"))el("v1p-units").textContent=totalU.toFixed(1)+"u";
+  renderV1Preds();
+}
+function v1PredFilter(f){_v1PredFilter=f;var a=document.getElementById("v1pf-all"),b=document.getElementById("v1pf-bets");if(a)a.classList.toggle("active",f==="all");if(b)b.classList.toggle("active",f==="bets");renderV1Preds();}
+function renderV1Preds(){
+  var c=document.getElementById("v1-pred-container");if(!c||!_v1PredsAll.length)return;
+  var mm=new Map();_v1PredsAll.forEach(function(r){var k=[r.fighter||r.name,r.opponent].sort().join("__");if(!mm.has(k))mm.set(k,[]);mm.get(k).push(r);});
+  var fights=Array.from(mm.values());if(_v1PredFilter==='bets')fights=fights.filter(function(p){return p.some(function(r){return parseFloat(r.bet_size||r.units||0)>0;});});
+  if(!fights.length){c.innerHTML='<div class="no-event"><div class="no-event-title">No bets this week</div></div>';return;}
+  c.innerHTML=fights.map(function(pair){var fa=pair[0],fb=pair[1]||{name:fa.opponent};var hb=pair.some(function(r){return parseFloat(r.bet_size||r.units||0)>0;});
+  return'<div class="pred-fight'+(hb?' has-bet':'')+'"><div class="pred-fight-header"><span class="pred-fight-wc">'+(fa.weight_class||"")+'</span>'+(hb?'<span class="badge badge-market">Bet</span>':'')+'</div><div class="pred-versus"><div class="pred-fighter"><div class="pred-fighter-name">'+(fa.fighter||fa.name||"--")+'</div>'+probBar(parseFloat(fa.predicted_probability||fa.win_prob||0))+oddsChip(fa.Odds||fa.odds_numeric)+'</div><div class="pred-vs-center"><span class="pred-vs-text">VS</span></div><div class="pred-fighter right"><div class="pred-fighter-name">'+(fb.fighter||fb.name||fa.opponent||"--")+'</div>'+probBar(parseFloat(fb.predicted_probability||fb.win_prob||0))+oddsChip(fb.Odds||fb.odds_numeric)+'</div></div></div>';}).join("");
+}
+
+async function loadV1Results(){
+  var r2=await Promise.all([getV1Titles(),getV1AllResults()]);var titles=r2[0],results=r2[1];
+  if(!results||!results.length)return;
+  var normR=results.map(function(r){return Object.assign({},r,{bet_size:r.bet_size||r.units||"0"});});
+  var m=calcMetrics(normR),bets=results.filter(function(r){return parseFloat(r.bet_size||r.units||0)>0;});
+  var el=function(id){return document.getElementById(id);};
+  if(el("v1r-bets"))el("v1r-bets").textContent=m.total_bets;
+  if(el("v1r-wl"))el("v1r-wl").textContent=m.winning_bets+"W / "+m.losing_bets+"L";
+  if(el("v1r-wr")){el("v1r-wr").textContent=m.win_rate+"%";el("v1r-wr-card")&&el("v1r-wr-card").classList.add(parseFloat(m.win_rate)>=55?"positive":"negative");}
+  if(el("v1r-rtp")){el("v1r-rtp").textContent=m.rtp+"%";el("v1r-rtp-card")&&el("v1r-rtp-card").classList.add(parseFloat(m.rtp)>=100?"positive":"negative");}
+  if(el("v1r-net")){var n=parseFloat(m.net_units);el("v1r-net").textContent=(n>=0?"+":"")+n.toFixed(2)+"u";el("v1r-net-card")&&el("v1r-net-card").classList.add(n>=0?"positive":"negative");}
+  if(el("v1r-count"))el("v1r-count").textContent=bets.length+" bets";
+  if(el("v1r-tbody"))el("v1r-tbody").innerHTML=bets.length?bets.map(function(r){var won=r.won==="1"||r.won===1,net=parseFloat(r.net||r.profit||0),bs=parseFloat(r.bet_size||r.units||0);return'<tr><td class="td-name" style="color:var(--text-secondary);">'+(r.name||r.fighter||"--")+'</td><td class="td-mono">'+(r.opponent||"--")+'</td><td>'+(won?'<span class="badge badge-won">W</span>':'<span class="badge badge-lost">L</span>')+'</td><td class="td-mono">'+fmtOdds(r.Odds||r.odds_numeric)+'</td><td class="td-mono" data-val="bet_size" data-raw="'+bs+'">'+fmtUnits(bs)+'</td><td class="'+pnlClass(net)+'" data-val="net" data-raw="'+net+'">'+fmtPnL(net)+'</td><td style="font-size:12px;color:var(--text-muted);">'+(r.event_name||r.event||"--")+'</td></tr>';}).join(""):'<tr><td colspan="7" class="alert-empty">No V1 bets recorded</td></tr>';
+  makeSortable(el("v1r-table"));
+}
+
+async function loadV1Statistics(){
+  var stats=await getV1Stats();var sl=document.getElementById("v1s-loading"),sc=document.getElementById("v1s-content");
+  if(sl)sl.style.display="none";
+  if(!stats){if(sc){sc.innerHTML='<div class="alert alert-info">No V1 statistics available.</div>';sc.style.display="block";}return;}
+  if(sc)sc.style.display="block";
+  var perf=stats.overall_performance||{},bs=stats.basic_statistics||{},tt=stats.t_test||{},mon=stats.monthly_performance||[],bsd=stats.bet_size_distribution||{};
+  var el=function(id){return document.getElementById(id);};
+  if(perf.rtp_pct!==undefined&&el("v1s-rtp")){el("v1s-rtp").textContent=parseFloat(perf.rtp_pct).toFixed(1)+"%";el("v1s-rtp-card")&&el("v1s-rtp-card").classList.add(parseFloat(perf.rtp_pct)>=100?"positive":"negative");}
+  if(perf.win_rate_pct!==undefined&&el("v1s-wr")){el("v1s-wr").textContent=parseFloat(perf.win_rate_pct).toFixed(1)+"%";el("v1s-wr-sub")&&(el("v1s-wr-sub").textContent=(perf.total_wins||0)+"W / "+(perf.total_losses||0)+"L");el("v1s-wr-card")&&el("v1s-wr-card").classList.add(parseFloat(perf.win_rate_pct)>=55?"positive":"negative");}
+  if(perf.net_units!==undefined&&el("v1s-net")){var n2=parseFloat(perf.net_units);el("v1s-net").textContent=(n2>=0?"+":"")+n2.toFixed(2);el("v1s-net-card")&&el("v1s-net-card").classList.add(n2>=0?"positive":"negative");}
+  if(bsd.mean_units&&el("v1s-avgbet"))el("v1s-avgbet").textContent=parseFloat(bsd.mean_units).toFixed(2);
+  if(tt.conclusion&&el("v1s-ttest-conclusion")){var pass=tt.conclusion==="Reject H0";el("v1s-ttest-conclusion").textContent=pass?"Edge Detected":"No Significant Edge";el("v1s-ttest-conclusion").className="ttest-result "+(pass?"pass":"fail");el("v1s-ttest-t")&&(el("v1s-ttest-t").textContent=fmt(tt.t_statistic,3));el("v1s-ttest-p")&&(el("v1s-ttest-p").textContent=fmt(tt.p_value_one_sided,4));el("v1s-ttest-sig")&&(el("v1s-ttest-sig").textContent=parseFloat(tt.p_value_one_sided)<0.05?"p < 0.05":"p >= 0.05");el("v1s-ttest-n")&&(el("v1s-ttest-n").textContent=bs.count||"--");}
+  if(mon.length&&el("v1s-monthly-tbody"))el("v1s-monthly-tbody").innerHTML=mon.slice().reverse().map(function(m){var n=parseFloat(m.net_units||0);return'<tr><td class="td-mono">'+m.month+'</td><td class="td-mono">'+m.bets+'</td><td class="td-mono">'+fmt(m.win_rate,1)+'%</td><td class="td-mono">'+fmt(m.units_staked,2)+'u</td><td class="'+pnlClass(n)+'">'+fmtPnL(n)+'</td><td class="td-mono '+(parseFloat(m.rtp)>=100?'td-positive':'td-negative')+'">'+fmt(m.rtp,1)+'%</td></tr>';}).join("");
+  else if(el("v1s-monthly-tbody"))el("v1s-monthly-tbody").innerHTML='<tr><td colspan="6" class="alert-empty">No monthly data</td></tr>';
+  if(mon.length&&!_v1ChartBuilt&&el("v1s-chart-monthly")){_v1ChartBuilt=true;var cd=chartDefaults();new Chart(el("v1s-chart-monthly").getContext("2d"),{type:"bar",data:{labels:mon.map(function(m){return m.month;}),datasets:[{label:"Net Units",data:mon.map(function(m){return parseFloat(m.net_units||0);}),backgroundColor:mon.map(function(m){return parseFloat(m.net_units||0)>=0?"rgba(184,146,74,0.65)":"rgba(212,25,42,0.65)";}),borderRadius:2}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:cd.textColor,font:{family:cd.font,size:10}},grid:{color:cd.gridColor}},y:{ticks:{color:cd.textColor,font:{family:cd.font,size:10},callback:function(v){return(v>=0?"+":"")+v.toFixed(1)+"u";}},grid:{color:cd.gridColor}}}}});}
+}
+
+function showV1Panel(panel){document.querySelectorAll(".v1-panel").forEach(function(el){el.style.display=el.dataset.panel===panel?"":"none";});document.querySelectorAll(".v1-subnav-tab,.v1-nav-link").forEach(function(btn){btn.classList.toggle("active",btn.dataset.panel===panel);});var ov=document.getElementById("v1-overlay");if(ov)ov.scrollTop=0;}
+</script>
+</body>
+</html>
