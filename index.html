@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>OctaStats — UFC Fight Prediction Model</title>
+  <meta name="description" content="Data-driven UFC fight predictions using dynamic logit modelling, fighting style analysis, and market odds integration." />
+  <meta name="theme-color" content="#08080a" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <script src="assets/js/main.js"></script>
+</head>
+<body>
+
+<!-- ── Nav ── -->
+<nav class="nav" role="navigation" aria-label="Main navigation">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-brand" aria-label="OctaStats home">
+      <span class="nav-brand-dot" aria-hidden="true"></span>
+      OctaStats
+    </a>
+    <div class="nav-links" role="list">
+      <a href="index.html"       class="nav-link" role="listitem">Home</a>
+      <a href="predictions.html" class="nav-link" role="listitem">Predictions</a>
+      <a href="results.html"     class="nav-link" role="listitem">Results</a>
+      <a href="statistics.html"  class="nav-link" role="listitem">Statistics</a>
+      <a href="v1/index.html"    class="nav-link-v1" role="listitem">V1 Model ↗</a>
+    </div>
+    <button class="theme-toggle" aria-label="Toggle light/dark mode">
+      <span class="icon-moon" aria-hidden="true">☾</span>
+      <span class="icon-sun"  aria-hidden="true">☀</span>
+    </button>
+    <button class="nav-hamburger" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- Mobile nav -->
+<div class="nav-mobile-menu" id="mobile-menu" role="dialog" aria-label="Navigation menu">
+  <a href="index.html"       class="nav-link">Home</a>
+  <a href="predictions.html" class="nav-link">Predictions</a>
+  <a href="results.html"     class="nav-link">Results</a>
+  <a href="statistics.html"  class="nav-link">Statistics</a>
+  <a href="v1/index.html"    class="nav-link-v1">V1 Model ↗</a>
+</div>
+
+<main class="page">
+
+  <!-- Hero -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-eyebrow">
+      <span class="hero-eyebrow-dot" aria-hidden="true"></span>
+      Machine Learning · UFC Analytics
+    </div>
+    <h1 class="hero-title" id="hero-title">
+      Fight<br><span>Predictions</span><br>Powered by Data
+    </h1>
+    <p class="hero-desc">
+      Dynamic logit model with LASSO regularization. Trained on 10+ years of UFCStats data.
+      Integrates market odds, fighting styles, and physical matchups to find betting edges.
+    </p>
+    <div class="hero-actions">
+      <a href="predictions.html" class="btn btn-red">View Predictions →</a>
+      <a href="statistics.html"  class="btn btn-outline">Model Stats</a>
+    </div>
+    <div class="hero-bg-text" aria-hidden="true">OCTA</div>
+  </section>
+
+  <!-- Upcoming event banner -->
+  <div class="event-banner fade-in" id="event-banner" role="complementary" aria-label="Upcoming event">
+    <div>
+      <div class="event-banner-label">Upcoming Event</div>
+      <div class="event-banner-name" id="upcoming-name">Loading…</div>
+    </div>
+    <a href="predictions.html" class="btn btn-red" id="event-cta">View Predictions</a>
+  </div>
+
+  <!-- Key stats -->
+  <div class="stat-grid stagger" id="stats-grid" aria-label="Model performance summary">
+    <div class="stat-card accent">
+      <div class="stat-label">Model AUC</div>
+      <div class="stat-value" id="stat-auc">—</div>
+      <div class="stat-sub">5-fold cross-validated</div>
+    </div>
+    <div class="stat-card" id="stat-rtp-card">
+      <div class="stat-label">All-time RTP</div>
+      <div class="stat-value" id="stat-rtp">—</div>
+      <div class="stat-sub">Return to player</div>
+    </div>
+    <div class="stat-card" id="stat-winrate-card">
+      <div class="stat-label">Win Rate</div>
+      <div class="stat-value" id="stat-winrate">—</div>
+      <div class="stat-sub" id="stat-winrate-sub">—</div>
+    </div>
+    <div class="stat-card" id="stat-net-card">
+      <div class="stat-label">Net Units</div>
+      <div class="stat-value" id="stat-net">—</div>
+      <div class="stat-sub">All-time P&L</div>
+    </div>
+  </div>
+
+  <!-- How it works -->
+  <section aria-labelledby="how-title" class="mb-24">
+    <div class="page-header">
+      <div class="page-eyebrow">Methodology</div>
+      <h2 class="page-title" id="how-title" style="font-size: clamp(22px,4vw,36px)">How It Works</h2>
+    </div>
+    <div class="method-grid stagger">
+      <div class="method-card">
+        <div class="method-num">01 / DATA</div>
+        <div class="method-title">10+ Years of Fights</div>
+        <div class="method-desc">Scraped directly from UFCStats — every fight since 2015. Strike stats, grappling, round-by-round, plus fighter physical attributes.</div>
+      </div>
+      <div class="method-card">
+        <div class="method-num">02 / MODEL</div>
+        <div class="method-title">Dynamic Logit + LASSO</div>
+        <div class="method-desc">Discrete-choice logistic regression with L1 regularization. Leak-free rolling career stats. Style-lag state variables capture momentum.</div>
+      </div>
+      <div class="method-card">
+        <div class="method-num">03 / ODDS</div>
+        <div class="method-title">Market Integration</div>
+        <div class="method-desc">Live DraftKings odds scraped Friday morning. Market implied probability feeds into the model — we look for mispriced fighters.</div>
+      </div>
+      <div class="method-card">
+        <div class="method-num">04 / SIZING</div>
+        <div class="method-title">Kelly Criterion</div>
+        <div class="method-desc">Continuous bet sizing via logistic-bounded Kelly. Minimum 1 unit, scales with confidence and edge. Never recommends negative EV bets.</div>
+      </div>
+      <div class="method-card">
+        <div class="method-num">05 / FINISH</div>
+        <div class="method-title">Finish Type Model</div>
+        <div class="method-desc">Separate multinomial logit predicts KO/TKO vs Submission vs Decision probability for every fight on the card.</div>
+      </div>
+      <div class="method-card">
+        <div class="method-num">06 / PROPS</div>
+        <div class="method-title">Prop Bet Filtering</div>
+        <div class="method-desc">Strict threshold: edge &gt;15pp AND confidence &gt;0.70 AND market &lt;0.65. Hidden by default — only shown when a real edge exists.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Disclaimer -->
+  <div class="alert alert-warn" role="note">
+    <strong>Disclaimer:</strong> OctaStats is a personal research project. Predictions are for entertainment and educational purposes only. Bet responsibly. Past model performance does not guarantee future results.
+  </div>
+
+</main>
+
+<footer>
+  <p>OctaStats — UFC Fight Prediction Model &nbsp;·&nbsp; Data: UFCStats.com &nbsp;·&nbsp; Odds: BestFightOdds.com</p>
+  <p class="mt-4" id="footer-updated"></p>
+</footer>
+
+<script>
+(async () => {
+  // Event banner
+  const titles = await getFightTitles();
+  const upcomingName = titles.upcoming || titles.upcoming_event || null;
+  const el = document.getElementById("upcoming-name");
+  const cta = document.getElementById("event-cta");
+  if (upcomingName) {
+    el.textContent = upcomingName;
+    cta.style.display = "";
+  } else {
+    el.textContent = "No event scheduled this week";
+    document.getElementById("event-cta").style.display = "none";
+  }
+
+  // Stats
+  const stats = await getV2Stats();
+  if (stats) {
+    const perf = stats.overall_performance || {};
+    const cv   = stats.model_cv_auc || null;
+
+    if (cv) document.getElementById("stat-auc").textContent = parseFloat(cv).toFixed(3);
+    
+    const rtp = perf.rtp_pct;
+    if (rtp !== undefined && rtp !== null) {
+      const rtpEl = document.getElementById("stat-rtp");
+      rtpEl.textContent = parseFloat(rtp).toFixed(1) + "%";
+      const card = document.getElementById("stat-rtp-card");
+      card.classList.add(parseFloat(rtp) >= 100 ? "positive" : "negative");
+    }
+    if (perf.win_rate_pct !== undefined) {
+      document.getElementById("stat-winrate").textContent = parseFloat(perf.win_rate_pct).toFixed(1) + "%";
+      document.getElementById("stat-winrate-sub").textContent =
+        `${perf.total_wins || 0}W / ${perf.total_losses || 0}L`;
+      document.getElementById("stat-winrate-card").classList.add(
+        parseFloat(perf.win_rate_pct) >= 55 ? "positive" : "neutral");
+    }
+    if (perf.net_units !== undefined) {
+      const net = parseFloat(perf.net_units);
+      document.getElementById("stat-net").textContent = (net >= 0 ? "+" : "") + net.toFixed(2);
+      document.getElementById("stat-net-card").classList.add(net >= 0 ? "positive" : "negative");
+    }
+  }
+
+  // Footer updated time
+  if (titles.updated_at) {
+    const d = new Date(titles.updated_at);
+    document.getElementById("footer-updated").textContent =
+      "Last updated: " + d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  }
+})();
+</script>
+
+</body>
+</html>
