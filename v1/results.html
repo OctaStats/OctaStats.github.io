@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>V1 Results — OctaStats</title>
+  <meta name="description" content="OctaStats V1 legacy model all-time betting results." />
+  <meta name="theme-color" content="#08080a" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <script src="../assets/js/main.js"></script>
+  <style>
+    .v1-legacy-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px;
+      border-radius: 99px;
+      border: 1px solid #7a6030;
+      background: #7a603010;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: #b8924a;
+      margin-bottom: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-brand"><span class="nav-brand-dot"></span>OctaStats</a>
+    <div class="nav-links">
+      <a href="../index.html"       class="nav-link">Home</a>
+      <a href="../predictions.html" class="nav-link">V2 Predictions</a>
+      <a href="../results.html"     class="nav-link">V2 Results</a>
+      <a href="index.html"          class="nav-link">V1 Model</a>
+    </div>
+    <button class="theme-toggle" aria-label="Toggle theme"><span class="icon-moon">☾</span><span class="icon-sun">☀</span></button>
+    <button class="nav-hamburger" aria-label="Open menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="nav-mobile-menu">
+  <a href="../index.html"       class="nav-link">Home</a>
+  <a href="../predictions.html" class="nav-link">V2 Predictions</a>
+  <a href="../results.html"     class="nav-link">V2 Results</a>
+  <a href="index.html"          class="nav-link">V1 Model</a>
+</div>
+
+<main class="page">
+
+  <div class="page-header">
+    <div class="v1-legacy-badge">
+      <span style="width:5px;height:5px;background:#b8924a;border-radius:50%;display:block;"></span>
+      V1 Legacy Model
+    </div>
+    <h1 class="page-title" style="color:var(--text-secondary);">V1 Betting Results</h1>
+    <p class="page-subtitle">
+      All-time record for the legacy linear regression model &mdash;
+      <a href="../results.html" style="color:var(--red);text-decoration:none;font-weight:600;">V2 Results ↗</a>
+    </p>
+  </div>
+
+  <div class="alert alert-warn mb-24" style="border-color:#7a603040;background:#7a603010;">
+    ⚠ These are <strong>V1 legacy results</strong>.
+    <a href="../results.html" style="color:inherit;font-weight:700;text-decoration:underline;">View V2 results</a> for the current model.
+  </div>
+
+  <!-- Summary cards -->
+  <div class="stat-grid stagger mb-24">
+    <div class="stat-card" id="v1r-bets-card">
+      <div class="stat-label">Total Bets</div>
+      <div class="stat-value" id="v1r-bets">—</div>
+      <div class="stat-sub" id="v1r-wl">—</div>
+    </div>
+    <div class="stat-card" id="v1r-wr-card">
+      <div class="stat-label">Win Rate</div>
+      <div class="stat-value" id="v1r-wr">—</div>
+    </div>
+    <div class="stat-card" id="v1r-rtp-card">
+      <div class="stat-label">RTP</div>
+      <div class="stat-value" id="v1r-rtp">—</div>
+      <div class="stat-sub">Return to player</div>
+    </div>
+    <div class="stat-card" id="v1r-net-card">
+      <div class="stat-label">Net Units</div>
+      <div class="stat-value" id="v1r-net">—</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tab-bar">
+    <div class="tab active" id="v1r-tab-all"    onclick="v1rShowTab('all')">All Results</div>
+    <div class="tab"        id="v1r-tab-recent" onclick="v1rShowTab('recent')">Most Recent Event</div>
+  </div>
+
+  <!-- All results -->
+  <div id="v1r-panel-all">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">All V1 Bets</span>
+        <span class="text-muted text-mono" id="v1r-all-count" style="font-size:11px;"></span>
+      </div>
+      <div class="table-wrap">
+        <table id="v1r-table-all">
+          <thead>
+            <tr>
+              <th data-sort="name">Fighter</th>
+              <th data-sort="opponent">Opponent</th>
+              <th>Result</th>
+              <th data-sort="Odds">Odds</th>
+              <th data-sort="bet_size">Bet</th>
+              <th data-sort="net">P&L</th>
+              <th>Event</th>
+            </tr>
+          </thead>
+          <tbody id="v1r-tbody-all">
+            <tr><td colspan="7" class="alert-empty">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent event -->
+  <div id="v1r-panel-recent" style="display:none;">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title" id="v1r-recent-title">Most Recent V1 Event</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Fighter</th>
+              <th>Opponent</th>
+              <th>Result</th>
+              <th>Odds</th>
+              <th>Bet</th>
+              <th>Model Prob</th>
+              <th>P&L</th>
+            </tr>
+          </thead>
+          <tbody id="v1r-tbody-recent">
+            <tr><td colspan="7" class="alert-empty">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <p>OctaStats V1 Legacy · <a href="../index.html">Back to V2</a></p>
+</footer>
+
+<script>
+function v1rShowTab(tab) {
+  document.getElementById("v1r-tab-all").classList.toggle("active", tab === "all");
+  document.getElementById("v1r-tab-recent").classList.toggle("active", tab === "recent");
+  document.getElementById("v1r-panel-all").style.display    = tab === "all"    ? "" : "none";
+  document.getElementById("v1r-panel-recent").style.display = tab === "recent" ? "" : "none";
+}
+
+function v1rBuildRow(r) {
+  const won    = r.won === "1" || r.won === 1;
+  const betSz  = parseFloat(r.bet_size || r.units || 0);
+  const hasBet = betSz > 0;
+  const net    = parseFloat(r.net || r.profit || 0);
+  const name   = r.name || r.fighter || "—";
+
+  return `<tr>
+    <td class="td-name" style="color:var(--text-secondary);">${name}</td>
+    <td class="td-mono" style="font-size:12px;">${r.opponent || "—"}</td>
+    <td>${hasBet
+      ? (won ? '<span class="badge badge-won">W</span>' : '<span class="badge badge-lost">L</span>')
+      : '<span style="color:var(--text-muted);font-size:11px;">—</span>'
+    }</td>
+    <td class="td-mono">${fmtOdds(r.Odds || r.odds_numeric)}</td>
+    <td class="td-mono" data-val="bet_size" data-raw="${betSz}">${hasBet ? fmtUnits(betSz) : '—'}</td>
+    <td class="${pnlClass(net)}" data-val="net" data-raw="${net}">${hasBet ? fmtPnL(net) : '—'}</td>
+    <td style="font-size:12px;color:var(--text-muted);">${r.event_name || r.event || "—"}</td>
+  </tr>`;
+}
+
+function v1rBuildRecentRow(r) {
+  const won    = r.won === "1" || r.won === 1;
+  const betSz  = parseFloat(r.bet_size || r.units || 0);
+  const hasBet = betSz > 0;
+  const net    = parseFloat(r.net || r.profit || 0);
+  const name   = r.name || r.fighter || "—";
+  const prob   = parseFloat(r.predicted_probability || r.win_prob || 0);
+
+  return `<tr>
+    <td class="td-name" style="color:var(--text-secondary);">${name}</td>
+    <td class="td-mono" style="font-size:12px;">${r.opponent || "—"}</td>
+    <td>${hasBet
+      ? (won ? '<span class="badge badge-won">W</span>' : '<span class="badge badge-lost">L</span>')
+      : '<span style="color:var(--text-muted);font-size:11px;">—</span>'
+    }</td>
+    <td class="td-mono">${fmtOdds(r.Odds || r.odds_numeric)}</td>
+    <td class="td-mono">${hasBet ? fmtUnits(betSz) : '—'}</td>
+    <td>${probBar(isNaN(prob) ? 0 : prob)}</td>
+    <td class="${pnlClass(net)}">${hasBet ? fmtPnL(net) : '—'}</td>
+  </tr>`;
+}
+
+(async () => {
+  const [titles, results] = await Promise.all([getV1Titles(), getV1AllResults()]);
+
+  if (!results || results.length === 0) {
+    const empty = '<tr><td colspan="7" class="alert-empty">No V1 results recorded yet</td></tr>';
+    document.getElementById("v1r-tbody-all").innerHTML    = empty;
+    document.getElementById("v1r-tbody-recent").innerHTML = empty;
+    return;
+  }
+
+  const bets = results.filter(r => parseFloat(r.bet_size || r.units || 0) > 0);
+  const m    = calcMetrics(results.map(r => ({ ...r, bet_size: r.bet_size || r.units || 0 })));
+
+  // Summary cards
+  document.getElementById("v1r-bets").textContent = m.total_bets;
+  document.getElementById("v1r-wl").textContent   = `${m.winning_bets}W / ${m.losing_bets}L`;
+  document.getElementById("v1r-wr").textContent   = m.win_rate + "%";
+  document.getElementById("v1r-rtp").textContent  = m.rtp + "%";
+  document.getElementById("v1r-net").textContent  = (parseFloat(m.net_units) >= 0 ? "+" : "") + m.net_units + "u";
+
+  document.getElementById("v1r-wr-card").classList.add(parseFloat(m.win_rate) >= 55 ? "positive" : "negative");
+  document.getElementById("v1r-rtp-card").classList.add(parseFloat(m.rtp) >= 100 ? "positive" : "negative");
+  document.getElementById("v1r-net-card").classList.add(parseFloat(m.net_units) >= 0 ? "positive" : "negative");
+
+  // All results table
+  const allTbody = document.getElementById("v1r-tbody-all");
+  allTbody.innerHTML = bets.length > 0
+    ? bets.map(v1rBuildRow).join("")
+    : '<tr><td colspan="7" class="alert-empty">No V1 bets recorded</td></tr>';
+  document.getElementById("v1r-all-count").textContent = bets.length + " bets";
+  makeSortable(document.getElementById("v1r-table-all"));
+
+  // Recent event
+  const recentName = titles.recent || null;
+  if (recentName) {
+    document.getElementById("v1r-recent-title").textContent = recentName;
+    const recentRows = results.filter(r =>
+      (r.event_name || r.event || "").toLowerCase().includes((recentName || "").toLowerCase()) &&
+      parseFloat(r.bet_size || r.units || 0) > 0
+    );
+    document.getElementById("v1r-tbody-recent").innerHTML = recentRows.length > 0
+      ? recentRows.map(v1rBuildRecentRow).join("")
+      : '<tr><td colspan="7" class="alert-empty">No V1 bets for this event</td></tr>';
+  } else {
+    document.getElementById("v1r-tbody-recent").innerHTML =
+      '<tr><td colspan="7" class="alert-empty">No recent event data</td></tr>';
+  }
+})();
+</script>
+
+</body>
+</html>
