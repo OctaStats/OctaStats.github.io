@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Statistics - OctaStats</title>
+  <meta name="description" content="OctaStats V2 model statistical analysis, visualizations, and hypothesis testing." />
+  <meta name="theme-color" content="#09090c" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <script src="assets/js/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+
+<nav class="nav" role="navigation">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-brand"><span class="nav-brand-dot"></span>OctaStats</a>
+    <div class="nav-links">
+      <a href="index.html"       class="nav-link">Home</a>
+      <a href="predictions.html" class="nav-link">Predictions</a>
+      <a href="results.html"     class="nav-link">Results</a>
+      <a href="statistics.html"  class="nav-link active">Statistics</a>
+    </div>
+    <div class="nav-v1-toggle" role="button" tabindex="0">
+      <span class="nav-v1-toggle-option opt-v2 active-opt">V2</span>
+      <span class="nav-v1-toggle-option opt-v1">V1</span>
+    </div>
+    <div class="theme-toggle-slider" role="button" tabindex="0">
+      <span class="theme-toggle-option opt-dark active-opt">&#9790;</span>
+      <span class="theme-toggle-option opt-light">&#9728;</span>
+    </div>
+    <button class="nav-hamburger" aria-label="Open menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="nav-mobile-menu">
+  <a href="index.html"       class="nav-link">Home</a>
+  <a href="predictions.html" class="nav-link">Predictions</a>
+  <a href="results.html"     class="nav-link">Results</a>
+  <a href="statistics.html"  class="nav-link active">Statistics</a>
+  <div class="nav-mobile-controls">
+    <span class="nav-mobile-label">Model</span>
+    <div class="nav-v1-toggle" style="cursor:pointer;">
+      <span class="nav-v1-toggle-option opt-v2 active-opt">V2</span>
+      <span class="nav-v1-toggle-option opt-v1">V1</span>
+    </div>
+    <span class="nav-mobile-label" style="margin-left:12px;">Theme</span>
+    <div class="theme-toggle-slider" style="cursor:pointer;">
+      <span class="theme-toggle-option opt-dark active-opt">&#9790;</span>
+      <span class="theme-toggle-option opt-light">&#9728;</span>
+    </div>
+  </div>
+</div>
+
+<main class="page">
+  <div class="page-header">
+    <div class="page-eyebrow">V2 Model</div>
+    <h1 class="page-title">Statistical Analysis</h1>
+    <p class="page-subtitle">Model calibration, performance analytics, and hypothesis testing</p>
+  </div>
+
+  <div id="stats-loading" class="loading"><div class="spinner"></div>Loading statistics...</div>
+  <div id="stats-content" style="display:none;">
+
+    <!-- Key stat cards -->
+    <div class="stat-grid stagger mb-24">
+      <div class="stat-card accent"><div class="stat-label">Model AUC</div><div class="stat-value" id="st-auc">--</div><div class="stat-sub">5-fold CV</div></div>
+      <div class="stat-card" id="st-rtp-card"><div class="stat-label">All-time RTP</div><div class="stat-value" id="st-rtp">--</div><div class="stat-sub">96% = break-even threshold</div></div>
+      <div class="stat-card winrate-card"><div class="stat-label">Win Rate</div><div class="stat-value" id="st-wr">--</div><div class="stat-sub" id="st-wr-sub">--</div></div>
+      <div class="stat-card" id="st-net-card"><div class="stat-label">Net Units</div><div class="stat-value" id="st-net">--</div></div>
+      <div class="stat-card"><div class="stat-label">Avg Bet Size</div><div class="stat-value" id="st-avgbet">--</div><div class="stat-sub">units</div></div>
+      <div class="stat-card"><div class="stat-label">Total Events</div><div class="stat-value" id="st-events">--</div></div>
+    </div>
+
+    <!-- Cumulative P&L chart - front and center -->
+    <div class="card mb-24">
+      <div class="card-header">
+        <span class="card-title">Cumulative P&amp;L (All-time)</span>
+        <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted);">Units over time</span>
+      </div>
+      <div class="card-body">
+        <div class="chart-wrap-lg"><canvas id="chart-cumulative"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Hypothesis test + calibration -->
+    <div class="grid-2 mb-24">
+      <div class="ttest-box">
+        <div class="card-title" style="margin-bottom:12px;">Hypothesis Test</div>
+        <p style="font-family:var(--font-mono);font-size:11px;color:var(--text-secondary);margin-bottom:14px;line-height:1.6;">H0: Mean profit multiplier = 0.96 (break-even after vig)<br>H1: Mean profit multiplier &gt; 0.96 (model generates edge)</p>
+        <div class="ttest-result" id="ttest-conclusion">--</div>
+        <div class="ttest-row"><span class="ttest-row-label">T-statistic</span><span class="ttest-row-val" id="ttest-t">--</span></div>
+        <div class="ttest-row"><span class="ttest-row-label">p-value (one-sided)</span><span class="ttest-row-val" id="ttest-p">--</span></div>
+        <div class="ttest-row"><span class="ttest-row-label">Significance</span><span class="ttest-row-val" id="ttest-sig">--</span></div>
+        <div class="ttest-row"><span class="ttest-row-label">Sample size</span><span class="ttest-row-val" id="ttest-n">--</span></div>
+      </div>
+      <div class="card"><div class="card-header"><span class="card-title">Model Calibration</span></div><div class="card-body"><div class="chart-wrap"><canvas id="chart-cal"></canvas></div></div></div>
+    </div>
+
+    <!-- Deep-dive visualizations in tabs -->
+    <div class="card mb-24">
+      <div class="card-header"><span class="card-title">Performance Breakdown</span></div>
+      <div style="padding:0 18px;">
+        <div class="viz-tabs">
+          <button class="viz-tab active" onclick="showVizTab('monthly',this)">Monthly P&amp;L</button>
+          <button class="viz-tab" onclick="showVizTab('rtp-odds',this)">RTP by Odds</button>
+          <button class="viz-tab" onclick="showVizTab('rtp-betsize',this)">RTP by Bet Size</button>
+          <button class="viz-tab" onclick="showVizTab('division',this)">By Division</button>
+          <button class="viz-tab" onclick="showVizTab('gender',this)">Male vs Female</button>
+          <button class="viz-tab" onclick="showVizTab('betdist',this)">Bet Distribution</button>
+        </div>
+      </div>
+      <div class="card-body" style="padding-top:4px;">
+        <div class="viz-panel active" id="viz-monthly">
+          <div class="chart-wrap"><canvas id="chart-monthly"></canvas></div>
+        </div>
+        <div class="viz-panel" id="viz-rtp-odds">
+          <div class="chart-wrap"><canvas id="chart-rtp-odds"></canvas></div>
+          <p style="font-size:12px;color:var(--text-muted);font-family:var(--font-mono);margin-top:8px;">RTP by market odds bracket. Red line = 96% break-even threshold.</p>
+        </div>
+        <div class="viz-panel" id="viz-rtp-betsize">
+          <div class="chart-wrap"><canvas id="chart-rtp-betsize"></canvas></div>
+          <p style="font-size:12px;color:var(--text-muted);font-family:var(--font-mono);margin-top:8px;">RTP grouped by Kelly bet size. Larger bets signal higher model confidence.</p>
+        </div>
+        <div class="viz-panel" id="viz-division">
+          <div id="division-breakdown" class="breakdown-grid"></div>
+        </div>
+        <div class="viz-panel" id="viz-gender">
+          <div class="grid-2" style="gap:12px;">
+            <div class="card" style="border:none;background:var(--bg-elevated);">
+              <div class="card-body">
+                <div class="page-eyebrow" style="margin-bottom:8px;">Male Bouts</div>
+                <div id="gender-male-stats"></div>
+              </div>
+            </div>
+            <div class="card" style="border:none;background:var(--bg-elevated);">
+              <div class="card-body">
+                <div class="page-eyebrow" style="color:#e879f9;margin-bottom:8px;">Female Bouts</div>
+                <div id="gender-female-stats"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="viz-panel" id="viz-betdist">
+          <div class="chart-wrap"><canvas id="chart-betsize"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Monthly table -->
+    <h2 class="section-title">Monthly Performance</h2>
+    <div class="card mb-24">
+      <div class="table-wrap">
+        <table><thead><tr><th>Month</th><th>Bets</th><th>Win Rate</th><th>Staked</th><th>Net Units</th><th>RTP</th></tr></thead>
+        <tbody id="monthly-tbody"><tr><td colspan="6" class="alert-empty">Loading...</td></tr></tbody></table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <p>OctaStats &nbsp;&middot;&nbsp; Data: UFCStats.com &nbsp;&middot;&nbsp; Odds: BestFightOdds.com</p>
+  <p class="mt-4">
+    <a href="https://github.com/zwinship" target="_blank" rel="noopener">GitHub</a>
+    &nbsp;&middot;&nbsp;
+    <a href="https://zwinship.github.io/" target="_blank" rel="noopener">Portfolio</a>
+  </p>
+  <!-- One year of learning, building, and losing units. V2 is what V1 always wanted to be. -->
+  <p class="mt-4" style="font-size:9px;color:var(--text-muted);opacity:0.4;letter-spacing:0.06em;" title="Year one complete.">v1.0.0 &rarr; v2.0.0</p>
+</footer>
+
+<!-- V1 Overlay -->
+<div class="v1-overlay" id="v1-overlay" style="display:none;">
+  <div class="v1-nav">
+    <div class="v1-nav-inner">
+      <span class="v1-brand"><span class="v1-brand-dot"></span>OctaStats <span style="font-size:10px;color:#b8924a;margin-left:4px;font-family:var(--font-mono);">V1</span></span>
+      <button class="v1-nav-link" data-panel="home" onclick="showV1Panel('home')">Home</button>
+      <button class="v1-nav-link" data-panel="predictions" onclick="showV1Panel('predictions')">Predictions</button>
+      <button class="v1-nav-link" data-panel="results" onclick="showV1Panel('results')">Results</button>
+      <button class="v1-nav-link active" data-panel="statistics" onclick="showV1Panel('statistics')">Statistics</button>
+      <button class="v1-back-btn v1-close-btn" style="margin-left:auto;">&#8592; Back to V2</button>
+    </div>
+  </div>
+
+  <!-- V1 Home -->
+  <div class="v1-page v1-panel" data-panel="home" style="display:none;">
+    <div class="v1-hero-section">
+      <div class="v1-heritage-badge"><span class="v1-heritage-dot"></span>Legacy Model · Superseded by V2</div>
+      <h1 class="v1-hero-title">OctaStats<br>V1 Model</h1>
+      <p style="color:var(--text-muted);max-width:480px;font-size:14px;line-height:1.65;margin-bottom:20px;position:relative;z-index:1;">The original OctaStats linear regression model with discrete 0 to 3 unit bet sizing. <strong style="color:var(--text-secondary);">V2 is the active model.</strong></p>
+      <div class="hero-actions">
+        <button class="btn btn-outline" onclick="showV1Panel('predictions')">V1 Predictions</button>
+        <button class="btn btn-outline" onclick="showV1Panel('results')">V1 Results</button>
+        <button class="btn btn-outline" onclick="showV1Panel('statistics')">V1 Statistics</button>
+        <button class="btn v1-close-btn" style="background:var(--red);color:#fff;">Back to V2</button>
+      </div>
+      <div class="v1-hero-bg" aria-hidden="true">V1</div>
+    </div>
+    <div class="stat-grid stagger mb-24">
+      <div class="stat-card"><div class="stat-label">Total Bets</div><div class="stat-value" id="v1h-total">--</div></div>
+      <div class="stat-card winrate-card"><div class="stat-label">Win Rate</div><div class="stat-value" id="v1h-wr">--</div></div>
+      <div class="stat-card" id="v1h-rtp-card"><div class="stat-label">RTP</div><div class="stat-value" id="v1h-rtp">--</div></div>
+      <div class="stat-card" id="v1h-net-card"><div class="stat-label">Net Units</div><div class="stat-value" id="v1h-net">--</div></div>
+    </div>
+    <div class="page-header"><div class="page-eyebrow">Comparison</div><h2 class="page-title" style="font-size:clamp(22px,4vw,34px)">V1 vs V2</h2></div>
+    <div class="card mb-24"><div class="table-wrap"><table class="diff-table">
+      <thead><tr><th>Feature</th><th>V1 (Legacy)</th><th>V2 (Current)</th></tr></thead>
+      <tbody>
+        <tr><td>Model type</td><td class="v1-col">Linear regression (OLS)</td><td class="v2-col">Dynamic logit (logistic regression)</td></tr>
+        <tr><td>Regularization</td><td class="v1-col">None</td><td class="v2-col">LASSO (L1), cross-validated</td></tr>
+        <tr><td>Bet sizing</td><td class="v1-col">Discrete 0/1/2/3 units</td><td class="v2-col">Continuous Kelly-bounded (1 to 5u)</td></tr>
+        <tr><td>Market odds</td><td class="v1-col">Basic input feature</td><td class="v2-col">Implied prob + model/market blend</td></tr>
+        <tr><td>Style prediction</td><td class="v1-col">Static career style label</td><td class="v2-col">Dynamic in-fight style prediction</td></tr>
+        <tr><td>Style interactions</td><td class="v1-col">Basic categories</td><td class="v2-col">6 styles x 36 matchup interactions</td></tr>
+        <tr><td>Finish prediction</td><td class="v1-col">Not available</td><td class="v2-col">Multinomial logit (KO / Sub / Dec)</td></tr>
+        <tr><td>Prop models</td><td class="v1-col">Not available</td><td class="v2-col">Goes distance / KO / Submission</td></tr>
+      </tbody>
+    </table></div></div>
+  </div>
+
+  <!-- V1 Predictions -->
+  <div class="v1-page v1-panel" data-panel="predictions" style="display:none;">
+    <div class="page-header"><div class="page-eyebrow">V1 Legacy Model</div><h1 class="page-title" style="color:var(--text-secondary);">V1 Fight Predictions</h1></div>
+    <div class="stat-grid stagger mb-20" style="grid-template-columns:repeat(auto-fit,minmax(110px,1fr));">
+      <div class="stat-card"><div class="stat-label">Fights</div><div class="stat-value" id="v1p-fights">--</div></div>
+      <div class="stat-card"><div class="stat-label">Bets</div><div class="stat-value" id="v1p-bets">--</div></div>
+      <div class="stat-card"><div class="stat-label">Total Units</div><div class="stat-value" id="v1p-units">--</div></div>
+    </div>
+    <div class="filter-bar">
+      <button class="btn btn-outline active" id="v1pf-all" onclick="v1PredFilter('all')">All Fights</button>
+      <button class="btn btn-outline" id="v1pf-bets" onclick="v1PredFilter('bets')">Bets Only</button>
+    </div>
+    <div id="v1-pred-container"><div class="loading"><div class="spinner"></div>Loading V1 predictions...</div></div>
+  </div>
+
+  <!-- V1 Results -->
+  <div class="v1-page v1-panel" data-panel="results" style="display:none;">
+    <div class="page-header"><div class="page-eyebrow">V1 Legacy Model</div><h1 class="page-title" style="color:var(--text-secondary);">V1 Betting Results</h1></div>
+    <div class="stat-grid stagger mb-24">
+      <div class="stat-card"><div class="stat-label">Total Bets</div><div class="stat-value" id="v1r-bets">--</div><div class="stat-sub" id="v1r-wl">--</div></div>
+      <div class="stat-card winrate-card"><div class="stat-label">Win Rate</div><div class="stat-value" id="v1r-wr">--</div></div>
+      <div class="stat-card" id="v1r-rtp-card"><div class="stat-label">RTP</div><div class="stat-value" id="v1r-rtp">--</div></div>
+      <div class="stat-card" id="v1r-net-card"><div class="stat-label">Net Units</div><div class="stat-value" id="v1r-net">--</div></div>
+    </div>
+    <div class="tab-bar">
+      <div class="tab" id="v1rt-recent" onclick="v1ResultsTab('recent')">Recent Event</div>
+      <div class="tab active" id="v1rt-all" onclick="v1ResultsTab('all')">All Results</div>
+    </div>
+    <div id="v1r-panel-recent" style="display:none;">
+      <div class="card mb-16">
+        <div class="card-header"><span class="card-title" id="v1r-recent-title">Recent Event</span></div>
+        <div class="table-wrap"><table><thead><tr><th>Fighter</th><th>Opponent</th><th>Result</th><th>Odds</th><th>Bet</th><th>Win Prob</th><th>P&amp;L</th></tr></thead><tbody id="v1r-tbody-recent"><tr><td colspan="7" class="alert-empty">Loading...</td></tr></tbody></table></div>
+      </div>
+    </div>
+    <div id="v1r-panel-all">
+      <div class="card">
+        <div class="card-header"><span class="card-title">All V1 Bets</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);" id="v1r-count"></span></div>
+        <div class="table-wrap"><table id="v1r-table"><thead><tr><th data-sort="name">Fighter</th><th>Opponent</th><th>Result</th><th data-sort="Odds">Odds</th><th data-sort="bet_size">Bet</th><th data-sort="net">P&amp;L</th><th>Event</th></tr></thead><tbody id="v1r-tbody"><tr><td colspan="7" class="alert-empty">Loading...</td></tr></tbody></table></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- V1 Statistics -->
+  <div class="v1-page v1-panel" data-panel="statistics">
+    <div class="page-header"><div class="page-eyebrow">V1 Legacy Model</div><h1 class="page-title" style="color:var(--text-secondary);">V1 Statistical Analysis</h1><p class="page-subtitle">Legacy model performance · One year of data</p></div>
+    <div id="v1s-loading" class="loading"><div class="spinner"></div>Loading V1 statistics...</div>
+    <div id="v1s-content" style="display:none;">
+
+      <!-- Key metrics -->
+      <div class="stat-grid stagger mb-24" style="grid-template-columns:repeat(auto-fit,minmax(120px,1fr));">
+        <div class="stat-card" id="v1s-rtp-card"><div class="stat-label">All-time RTP</div><div class="stat-value" id="v1s-rtp">--</div><div class="stat-sub">96% = break-even</div></div>
+        <div class="stat-card winrate-card"><div class="stat-label">Win Rate</div><div class="stat-value" id="v1s-wr">--</div><div class="stat-sub" id="v1s-wr-sub">--</div></div>
+        <div class="stat-card" id="v1s-net-card"><div class="stat-label">Net Units</div><div class="stat-value" id="v1s-net">--</div></div>
+        <div class="stat-card"><div class="stat-label">Total Bets</div><div class="stat-value" id="v1s-total">--</div></div>
+        <div class="stat-card"><div class="stat-label">Avg Bet</div><div class="stat-value" id="v1s-avgbet">--</div><div class="stat-sub">units</div></div>
+        <div class="stat-card"><div class="stat-label">Events</div><div class="stat-value" id="v1s-events">--</div></div>
+      </div>
+
+      <!-- Cumulative P&L - main visual -->
+      <div class="card mb-24">
+        <div class="card-header">
+          <span class="card-title">Cumulative P&amp;L (V1 All-time)</span>
+          <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted);">Units over time</span>
+        </div>
+        <div class="card-body"><div class="chart-wrap-lg"><canvas id="v1s-chart-cumulative"></canvas></div></div>
+      </div>
+
+      <!-- Hypothesis test + RTP by odds -->
+      <div class="grid-2 mb-24">
+        <div class="ttest-box">
+          <div class="card-title" style="margin-bottom:12px;">Hypothesis Test</div>
+          <p style="font-family:var(--font-mono);font-size:11px;color:var(--text-secondary);margin-bottom:14px;line-height:1.6;">H0: Mean profit multiplier = 0.96 (break-even after vig)<br>H1: Mean profit multiplier &gt; 0.96 (model generates edge)</p>
+          <div class="ttest-result" id="v1s-ttest-conclusion">--</div>
+          <div class="ttest-row"><span class="ttest-row-label">T-statistic</span><span class="ttest-row-val" id="v1s-ttest-t">--</span></div>
+          <div class="ttest-row"><span class="ttest-row-label">p-value (one-sided)</span><span class="ttest-row-val" id="v1s-ttest-p">--</span></div>
+          <div class="ttest-row"><span class="ttest-row-label">Significance</span><span class="ttest-row-val" id="v1s-ttest-sig">--</span></div>
+          <div class="ttest-row"><span class="ttest-row-label">Sample size</span><span class="ttest-row-val" id="v1s-ttest-n">--</span></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">RTP by Odds Bracket</span></div>
+          <div class="card-body"><div class="chart-wrap"><canvas id="v1s-chart-rtp-odds"></canvas></div>
+          <p style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);margin-top:8px;">Red line = 96% break-even threshold.</p></div>
+        </div>
+      </div>
+
+      <!-- Performance breakdown tabs -->
+      <div class="card mb-24">
+        <div class="card-header"><span class="card-title">Performance Breakdown</span></div>
+        <div style="padding:0 18px;">
+          <div class="viz-tabs" id="v1s-viz-tabs">
+            <button class="viz-tab active" onclick="showV1VizTab('monthly',this)">Monthly P&amp;L</button>
+            <button class="viz-tab" onclick="showV1VizTab('betsize',this)">RTP by Bet Size</button>
+            <button class="viz-tab" onclick="showV1VizTab('betdist',this)">Bet Distribution</button>
+            <button class="viz-tab" onclick="showV1VizTab('streaks',this)">Win/Loss Streaks</button>
+            <button class="viz-tab" onclick="showV1VizTab('oddswin',this)">Odds vs Win Rate</button>
+          </div>
+        </div>
+        <div class="card-body" style="padding-top:4px;">
+          <div class="viz-panel active" id="v1viz-monthly"><div class="chart-wrap"><canvas id="v1s-chart-monthly"></canvas></div></div>
+          <div class="viz-panel" id="v1viz-betsize"><div class="chart-wrap"><canvas id="v1s-chart-betsize"></canvas></div><p style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);margin-top:8px;">RTP by unit bet size. Higher confidence bets should show higher RTP.</p></div>
+          <div class="viz-panel" id="v1viz-betdist"><div class="chart-wrap"><canvas id="v1s-chart-betdist"></canvas></div></div>
+          <div class="viz-panel" id="v1viz-streaks"><div id="v1s-streaks-content" style="padding:12px 0;"></div></div>
+          <div class="viz-panel" id="v1viz-oddswin"><div class="chart-wrap"><canvas id="v1s-chart-oddswin"></canvas></div><p style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);margin-top:8px;">Win rate per odds bracket vs implied market probability.</p></div>
+        </div>
+      </div>
+
+      <!-- Monthly table -->
+      <h2 class="section-title">Monthly Breakdown</h2>
+      <div class="card mb-24"><div class="table-wrap"><table><thead><tr><th>Month</th><th>Bets</th><th>Win Rate</th><th>Staked</th><th>Net Units</th><th>RTP</th></tr></thead><tbody id="v1s-monthly-tbody"><tr><td colspan="6" class="alert-empty">Loading...</td></tr></tbody></table></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Viz tab switching ──────────────────────────────────────────────────────────
+function showVizTab(id, btn) {
+  // Scope to parent card so we don't clobber V1 viz panels
+  var container = btn && btn.closest ? btn.closest(".card") : document;
+  if (container) {
+    container.querySelectorAll(".viz-panel").forEach(function(p){ p.classList.remove("active"); });
+    container.querySelectorAll(".viz-tab").forEach(function(b){ b.classList.remove("active"); });
+  }
+  var panel = document.getElementById("viz-" + id);
+  if (panel) panel.classList.add("active");
+  if (btn) btn.classList.add("active");
+  if (id === "rtp-odds" && !_rtpOddsBuilt) { if (_allResults) buildRtpOddsChart(); else _pendingVizTab = id; }
+  if (id === "rtp-betsize" && !_rtpBetsizeBuilt) { if (_allResults) buildRtpBetsizeChart(); else _pendingVizTab = id; }
+  if (id === "division" && !_divisionBuilt) { if (_allResults) buildDivisionBreakdown(); else _pendingVizTab = id; }
+  if (id === "gender" && !_genderBuilt) { if (_allResults) buildGenderBreakdown(); else _pendingVizTab = id; }
+}
+
+var _statsData = null;
+var _allResults = null;
+var _cumulativeBuilt = false;
+var _rtpOddsBuilt = false;
+var _rtpBetsizeBuilt = false;
+var _divisionBuilt = false;
+var _genderBuilt = false;
+var _v1ChartBuilt = false;
+var _pendingVizTab = null;
+
+(async function(){
+  var stats = await getV2Stats();
+  var el = function(id){ return document.getElementById(id); };
+  el("stats-loading").style.display = "none";
+  if (!stats || stats.error) {
+    el("stats-content").innerHTML = '<div class="alert alert-info">No statistics data available yet.</div>';
+    el("stats-content").style.display = "block";
+    return;
+  }
+  _statsData = stats;
+  el("stats-content").style.display = "block";
+  var perf = stats.overall_performance || {};
+  var bs   = stats.basic_statistics    || {};
+  var tt   = stats.t_test              || {};
+  var cal  = stats.calibration         || [];
+  var mon  = stats.monthly_performance || [];
+  var bsd  = stats.bet_size_distribution || {};
+
+  var cv = stats.model_cv_auc;
+  if (cv && el("st-auc")) el("st-auc").textContent = parseFloat(cv).toFixed(3);
+
+  // RTP: green if >= 96%, red if below
+  if (perf.rtp_pct !== undefined && el("st-rtp")) {
+    el("st-rtp").textContent = parseFloat(perf.rtp_pct).toFixed(1) + "%";
+    el("st-rtp-card").classList.add(parseFloat(perf.rtp_pct) >= 96 ? "positive" : "negative");
+  }
+  // Win rate: white, no coloring
+  if (perf.win_rate_pct !== undefined && el("st-wr")) {
+    el("st-wr").textContent = parseFloat(perf.win_rate_pct).toFixed(1) + "%";
+    if (el("st-wr-sub")) el("st-wr-sub").textContent = (perf.total_wins||0) + "W / " + (perf.total_losses||0) + "L";
+  }
+  // Net units: green/red
+  if (perf.net_units !== undefined && el("st-net")) {
+    var n = parseFloat(perf.net_units);
+    el("st-net").textContent = (n >= 0 ? "+" : "") + n.toFixed(2);
+    el("st-net-card").classList.add(n >= 0 ? "positive" : "negative");
+  }
+  if (bsd.mean_units && el("st-avgbet")) el("st-avgbet").textContent = parseFloat(bsd.mean_units).toFixed(2);
+  if (mon.length && el("st-events")) el("st-events").textContent = mon.length;
+
+  // Hypothesis test - comparing against 96%
+  if (tt.conclusion && el("ttest-conclusion")) {
+    var pass = tt.conclusion === "Reject H0";
+    el("ttest-conclusion").textContent = pass ? "Edge Detected" : "No Significant Edge";
+    el("ttest-conclusion").className = "ttest-result " + (pass ? "pass" : "fail");
+    if (el("ttest-t")) el("ttest-t").textContent = fmt(tt.t_statistic, 3);
+    if (el("ttest-p")) el("ttest-p").textContent = fmt(tt.p_value_one_sided, 4);
+    if (el("ttest-sig")) el("ttest-sig").textContent = parseFloat(tt.p_value_one_sided) < 0.05 ? "p < 0.05" : "p >= 0.05";
+    if (el("ttest-n")) el("ttest-n").textContent = bs.count || "--";
+  }
+
+  // Monthly table
+  var tbody = el("monthly-tbody");
+  if (mon.length && tbody) {
+    tbody.innerHTML = mon.slice().reverse().map(function(m) {
+      var n = parseFloat(m.net_units||0);
+      return '<tr><td class="td-mono">' + m.month + '</td><td class="td-mono">' + m.bets + '</td><td class="td-mono">' + fmt(m.win_rate,1) + '%</td><td class="td-mono">' + fmt(m.units_staked,2) + 'u</td><td class="' + pnlClass(n) + '">' + fmtPnL(n) + '</td><td class="td-mono ' + (parseFloat(m.rtp) >= 96 ? 'td-positive' : 'td-negative') + '">' + fmt(m.rtp,1) + '%</td></tr>';
+    }).join("");
+  } else if (tbody) {
+    tbody.innerHTML = '<tr><td colspan="6" class="alert-empty">No monthly data yet</td></tr>';
+  }
+
+  var cd = chartDefaults();
+
+  // Cumulative P&L chart
+  if (mon.length && el("chart-cumulative") && !_cumulativeBuilt) {
+    _cumulativeBuilt = true;
+    var cumValues = [], cum = 0;
+    mon.forEach(function(m) { cum += parseFloat(m.net_units||0); cumValues.push(parseFloat(cum.toFixed(2))); });
+    new Chart(el("chart-cumulative").getContext("2d"), {
+      type: "line",
+      data: {
+        labels: mon.map(function(m){ return m.month; }),
+        datasets: [{
+          label: "Cumulative Net Units",
+          data: cumValues,
+          borderColor: "rgba(212,25,42,0.9)",
+          backgroundColor: "rgba(212,25,42,0.08)",
+          borderWidth: 2,
+          pointRadius: 3,
+          pointBackgroundColor: "rgba(212,25,42,0.9)",
+          fill: true,
+          tension: 0.35,
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: { backgroundColor: cd.tooltipBg, bodyColor: cd.tooltipText, titleColor: cd.tooltipText,
+            callbacks: { label: function(c){ return (c.parsed.y >= 0 ? "+" : "") + c.parsed.y.toFixed(2) + "u"; } }
+          }
+        },
+        scales: {
+          x: { ticks: { color: cd.textColor, font: { family: cd.font, size: 10 } }, grid: { color: cd.gridColor } },
+          y: { ticks: { color: cd.textColor, font: { family: cd.font, size: 10 }, callback: function(v){ return (v>=0?"+":"")+v.toFixed(1)+"u"; } }, grid: { color: cd.gridColor } }
+        }
+      }
+    });
+  }
+
+  // Monthly bar chart (in viz tab)
+  if (mon.length && el("chart-monthly")) {
+    new Chart(el("chart-monthly").getContext("2d"), {
+      type: "bar",
+      data: {
+        labels: mon.map(function(m){ return m.month; }),
+        datasets: [{ label: "Net Units", data: mon.map(function(m){ return parseFloat(m.net_units||0); }),
+          backgroundColor: mon.map(function(m){ return parseFloat(m.net_units||0) >= 0 ? "rgba(34,197,94,0.65)" : "rgba(212,25,42,0.65)"; }), borderRadius: 2 }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false }, tooltip: { backgroundColor: cd.tooltipBg, bodyColor: cd.tooltipText, titleColor: cd.tooltipText,
+          callbacks: { label: function(c){ return (c.parsed.y>=0?"+":"")+c.parsed.y.toFixed(2)+"u"; } } } },
+        scales: {
+          x: { ticks: { color: cd.textColor, font: { family: cd.font, size: 10 } }, grid: { color: cd.gridColor } },
+          y: { ticks: { color: cd.textColor, font: { family: cd.font, size: 10 }, callback: function(v){ return (v>=0?"+":"")+v.toFixed(1)+"u"; } }, grid: { color: cd.gridColor } }
+        }
+      }
+    });
+  }
+
+  // Calibration chart
+  if (cal.length && el("chart-cal")) {
+    new Chart(el("chart-cal").getContext("2d"), {
+      type: "bar",
+      data: {
+        labels: cal.map(function(c){ return c.prob_bucket; }),
+        datasets: [
+          { label: "Predicted", data: cal.map(function(c){ return parseFloat(c.avg_predicted||0)*100; }), backgroundColor: "rgba(59,130,246,0.5)", borderColor: "rgba(59,130,246,0.9)", borderWidth: 1, borderRadius: 2 },
+          { label: "Actual Win %", data: cal.map(function(c){ return parseFloat(c.actual_win_rate||0)*100; }), backgroundColor: "rgba(212,25,42,0.5)", borderColor: "rgba(212,25,42,0.9)", borderWidth: 1, borderRadius: 2 }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { labels: { color: cd.textColor, font: { family: cd.font, size: 10 } } }, tooltip: { backgroundColor: cd.tooltipBg, bodyColor: cd.tooltipText, titleColor: cd.tooltipText,
+          callbacks: { label: function(c){ return c.dataset.label + ": " + c.parsed.y.toFixed(1) + "%"; } } } },
+        scales: {
+          x: { ticks: { color: cd.textColor, font: { family: cd.font, size: 10 } }, grid: { color: cd.gridColor } },
+          y: { ticks: { color: cd.textColor, font: { family: cd.font, size: 10 }, callback: function(v){ return v+"%"; } }, grid: { color: cd.gridColor } }
+        }
+      }
+    });
+  }
+
+  // Bet size distribution
+  if (bsd.units_by_bucket && el("chart-betsize")) {
+    var b = bsd.units_by_bucket;
+    new Chart(el("chart-betsize").getContext("2d"), {
+      type: "bar",
+      data: {
+        labels: ["<1u","1-2u","2-3u","3-4u","4-5u"],
+        datasets: [{ label: "Count", data: [b["0-1"]||0,b["1-2"]||0,b["2-3"]||0,b["3-4"]||0,b["4-5"]||0],
+          backgroundColor: "rgba(212,25,42,0.6)", borderColor: "rgba(212,25,42,0.9)", borderWidth: 1, borderRadius: 2 }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false }, tooltip: { backgroundColor: cd.tooltipBg, bodyColor: cd.tooltipText, titleColor: cd.tooltipText } },
+        scales: {
+          x: { ticks: { color: cd.textColor, font: { family: cd.font, size: 10 } }, grid: { color: cd.gridColor } },
+          y: { ticks: { color: cd.textColor, font: { family: cd.font, size: 10 } }, grid: { color: cd.gridColor } }
+        }
+      }
+    });
+  }
+
+  // Load results for viz charts that need raw data
+  _allResults = await getV2AllResults();
+  // Flush any viz tab that was clicked before data loaded
+  if (_pendingVizTab) {
+    var pt = _pendingVizTab; _pendingVizTab = null;
+    if (pt === "rtp-odds" && !_rtpOddsBuilt) buildRtpOddsChart();
+    if (pt === "rtp-betsize" && !_rtpBetsizeBuilt) buildRtpBetsizeChart();
+    if (pt === "division" && !_divisionBuilt) buildDivisionBreakdown();
+    if (pt === "gender" && !_genderBuilt) buildGenderBreakdown();
+  }
+  // If V2 stats JSON was empty, try to build from V2 results CSV
+  if (!_statsData && _allResults && _allResults.length) {
+    var builtStats = buildStatsFromResults(_allResults);
+    if (builtStats) {
+      // Re-render with computed stats
+      renderV2Stats(builtStats);
+    }
+  }
+})();
+
+// ── Lazy-built visualization charts ──────────────────────────────────────────
+
+function buildRtpOddsChart() {
+  _rtpOddsBuilt = true;
+  if (!_allResults || !_allResults.length) return;
+  var cd = chartDefaults();
+  // Bucket by odds ranges
+  var buckets = { "Big Fav (<-200)": {staked:0,ret:0}, "Fav (-200 to -101)": {staked:0,ret:0}, "Pick'em (-100 to +100)": {staked:0,ret:0}, "Dog (+101 to +200)": {staked:0,ret:0}, "Big Dog (>+200)": {staked:0,ret:0} };
+  _allResults.forEach(function(r) {
+    var odds = parseFloat(r.Odds || r.odds_numeric);
+    var bs = parseFloat(r.bet_size || 0);
+    var ret = parseFloat(r.total_return || 0);
+    if (isNaN(odds) || bs <= 0) return;
+    var key = odds < -200 ? "Big Fav (<-200)" : odds < -100 ? "Fav (-200 to -101)" : odds <= 100 ? "Pick'em (-100 to +100)" : odds <= 200 ? "Dog (+101 to +200)" : "Big Dog (>+200)";
+    buckets[key].staked += bs;
+    buckets[key].ret += ret;
+  });
+  var labels = Object.keys(buckets);
+  var rtps = labels.map(function(k){ return buckets[k].staked > 0 ? parseFloat((buckets[k].ret/buckets[k].staked*100).toFixed(1)) : 0; });
+  var canvas = document.getElementById("chart-rtp-odds");
+  if (!canvas) return;
+  new Chart(canvas.getContext("2d"), {
+    type: "bar",
+    data: {
+      labels: labels,
+      datasets: [
+        { label: "RTP %", data: rtps, backgroundColor: rtps.map(function(v){ return v >= 96 ? "rgba(34,197,94,0.65)" : "rgba(212,25,42,0.65)"; }), borderRadius: 2 },
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: { backgroundColor: cd.tooltipBg, bodyColor: cd.tooltipText, titleColor: cd.tooltipText, callbacks: { label: function(c){ return c.parsed.y.toFixed(1)+"%"; } } },
+        annotation: { annotations: { line96: { type: "line", yMin: 96, yMax: 96, borderColor: "rgba(212,25,42,0.8)", borderWidth: 1.5, borderDash: [4,3] } } }
+      },
+      scales: {
+        x: { ticks: { color: cd.textColor, font: { family: cd.font, size: 9 } }, grid: { color: cd.gridColor } },
+        y: { ticks: { color: cd.textColor, font: { family: cd.font, size: 10 }, callback: function(v){ return v+"%"; } }, grid: { color: cd.gridColor } }
+      }
+    }
+  });
+}
+
+function buildRtpBetsizeChart() {
+  _rtpBetsizeBuilt = true;
+  if (!_allResults || !_allResults.length) return;
+  var cd = chartDefaults();
+  var buckets = { "1u": {staked:0,ret:0}, "2u": {staked:0,ret:0}, "3u": {staked:0,ret:0}, "4u": {staked:0,ret:0}, "5u": {staked:0,ret:0} };
+  _allResults.forEach(function(r) {
+    var bs = parseFloat(r.bet_size || 0);
+    var ret = parseFloat(r.total_return || 0);
+    if (bs <= 0) return;
+    var key = bs < 1.5 ? "1u" : bs < 2.5 ? "2u" : bs < 3.5 ? "3u" : bs < 4.5 ? "4u" : "5u";
+    buckets[key].staked += bs;
+    buckets[key].ret += ret;
+  });
+  var labels = Object.keys(buckets);
+  var rtps = labels.map(function(k){ return buckets[k].staked > 0 ? parseFloat((buckets[k].ret/buckets[k].staked*100).toFixed(1)) : 0; });
+  var canvas = document.getElementById("chart-rtp-betsize");
+  if (!canvas) return;
+  new Chart(canvas.getContext("2d"), {
+    type: "bar",
+    data: {
+      labels: labels,
+      datasets: [{ label: "RTP %", data: rtps, backgroundColor: rtps.map(function(v){ return v >= 96 ? "rgba(34,197,94,0.65)" : "rgba(212,25,42,0.65)"; }), borderRadius: 2 }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: { backgroundColor: cd.tooltipBg, bodyColor: cd.tooltipText, titleColor: cd.tooltipText, callbacks: { label: function(c){ return c.parsed.y.toFixed(1)+"%"; } } }
+      },
+      scales: {
+        x: { ticks: { color: cd.textColor, font: { family: cd.font, size: 10 } }, grid: { color: cd.gridColor } },
+        y: { ticks: { color: cd.textColor, font: { family: cd.font, size: 10 }, callback: function(v){ return v+"%"; } }, grid: { color: cd.gridColor } }
+      }
+    }
+  });
+}
+
+function buildDivisionBreakdown() {
+  _divisionBuilt = true;
+  if (!_allResults || !_allResults.length) return;
+  var divs = {};
+  _allResults.forEach(function(r) {
+    var wc = (r.weight_class || r.division || "Unknown").replace(/UFC\s*/i,"").trim();
+    if (!wc || wc === "nan") wc = "Unknown";
+    if (!divs[wc]) divs[wc] = {bets:0,wins:0};
+    if (parseFloat(r.bet_size||0) > 0) {
+      divs[wc].bets++;
+      if (r.won === "1" || r.won === 1) divs[wc].wins++;
+    }
+  });
+  var sorted = Object.keys(divs).sort(function(a,b){ return divs[b].bets - divs[a].bets; });
+  var container = document.getElementById("division-breakdown");
+  if (!container) return;
+  container.innerHTML = sorted.filter(function(d){ return divs[d].bets > 0; }).map(function(d) {
+    var wr = divs[d].bets > 0 ? (divs[d].wins / divs[d].bets * 100).toFixed(0) : 0;
+    return '<div class="breakdown-item"><div class="breakdown-label">' + d + '</div><div class="breakdown-val">' + wr + '<span style="font-size:14px;font-weight:400">%</span></div><div class="breakdown-sub">' + divs[d].wins + 'W / ' + (divs[d].bets-divs[d].wins) + 'L &middot; ' + divs[d].bets + ' bets</div></div>';
+  }).join("") || '<div class="alert-empty">No division data available</div>';
+}
+
+function buildGenderBreakdown() {
+  _genderBuilt = true;
+  if (!_allResults || !_allResults.length) return;
+  var groups = { male: {bets:0,wins:0,staked:0,ret:0}, female: {bets:0,wins:0,staked:0,ret:0} };
+  _allResults.forEach(function(r) {
+    var wc = (r.weight_class || r.division || "").toLowerCase();
+    var isFemale = wc.includes("women") || wc.includes("female") || wc.includes("strawweight") && !wc.includes("light");
+    // Strawweight is women's, Lightweight is men's etc
+    var isFemale2 = wc.includes("women") || wc.includes("female");
+    var key = isFemale2 ? "female" : "male";
+    var bs = parseFloat(r.bet_size||0);
+    if (bs > 0) {
+      groups[key].bets++;
+      groups[key].staked += bs;
+      groups[key].ret += parseFloat(r.total_return||0);
+      if (r.won === "1" || r.won === 1) groups[key].wins++;
+    }
+  });
+  function renderGender(id, g) {
+    var wr = g.bets > 0 ? (g.wins/g.bets*100).toFixed(1) : 0;
+    var rtp = g.staked > 0 ? (g.ret/g.staked*100).toFixed(1) : 0;
+    var net = (g.ret - g.staked).toFixed(2);
+    var rtpClass = parseFloat(rtp) >= 96 ? "style='color:var(--green)'" : "style='color:var(--red)'";
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = '<div class="stat-grid" style="grid-template-columns:1fr 1fr;gap:8px;">' +
+      '<div class="stat-card"><div class="stat-label">Bets</div><div class="stat-value">' + g.bets + '</div></div>' +
+      '<div class="stat-card winrate-card"><div class="stat-label">Win Rate</div><div class="stat-value">' + wr + '%</div></div>' +
+      '<div class="stat-card"><div class="stat-label">RTP</div><div class="stat-value" ' + rtpClass + '>' + rtp + '%</div></div>' +
+      '<div class="stat-card"><div class="stat-label">Net</div><div class="stat-value ' + (parseFloat(net)>=0?"positive":"negative") + '">' + (parseFloat(net)>=0?"+":"") + net + 'u</div></div>' +
+    '</div>';
+  }
+  renderGender("gender-male-stats", groups.male);
+  renderGender("gender-female-stats", groups.female);
+}
+
+// ── V1 Overlay ────────────────────────────────────────────────────────────────
+var _v1PredsAll = [], _v1PredFilter = "all";
+var _v1ResultsActiveTab = "all";
+
+function initV1OverlayContent() { loadV1HomeStats(); loadV1Predictions(); loadV1Results(); loadV1Statistics(); }
+
+async function loadV1HomeStats() {
+  var results = await getV1AllResults();
+  if (!results||!results.length) return;
+  var normR = results.map(function(r){ return Object.assign({},r,{bet_size:r.bet_size||r.units||"0"}); });
+  var m = calcMetrics(normR);
+  var el = function(id){ return document.getElementById(id); };
+  if(el("v1h-total")) el("v1h-total").textContent = m.total_bets;
+  if(el("v1h-wr")) el("v1h-wr").textContent = m.win_rate + "%";
+  if(el("v1h-rtp")) { el("v1h-rtp").textContent = m.rtp + "%"; if(el("v1h-rtp-card")) el("v1h-rtp-card").classList.add(parseFloat(m.rtp)>=96?"positive":"negative"); }
+  if(el("v1h-net")) { el("v1h-net").textContent=(parseFloat(m.net_units)>=0?"+":"")+m.net_units+"u"; if(el("v1h-net-card")) el("v1h-net-card").classList.add(parseFloat(m.net_units)>=0?"positive":"negative"); }
+}
+
+async function loadV1Predictions() {
+  var preds = await getV1Predictions();
+  var c = document.getElementById("v1-pred-container");
+  if (!preds||!preds.length) { if(c) c.innerHTML='<div class="no-event"><div class="no-event-icon">&#x1F94A;</div><div class="no-event-title">No V1 Predictions Posted</div></div>'; return; }
+  _v1PredsAll = preds;
+  var matchups = new Set(preds.map(function(r){ return [r.fighter||r.name,r.opponent].sort().join("__"); }));
+  var bets = preds.filter(function(r){ return parseFloat(r.bet_size||r.units||0)>0; });
+  var totalU = bets.reduce(function(s,r){ return s+parseFloat(r.bet_size||r.units||0); },0);
+  var el = function(id){ return document.getElementById(id); };
+  if(el("v1p-fights")) el("v1p-fights").textContent = matchups.size;
+  if(el("v1p-bets")) el("v1p-bets").textContent = bets.length;
+  if(el("v1p-units")) el("v1p-units").textContent = totalU.toFixed(1) + "u";
+  renderV1Preds();
+}
+
+function v1PredFilter(f) {
+  _v1PredFilter = f;
+  var a = document.getElementById("v1pf-all"), b = document.getElementById("v1pf-bets");
+  if(a) a.classList.toggle("active", f==="all");
+  if(b) b.classList.toggle("active", f==="bets");
+  renderV1Preds();
+}
+
+function renderV1Preds() {
+  var c = document.getElementById("v1-pred-container");
+  if (!c||!_v1PredsAll.length) return;
+  var mm = new Map();
+  _v1PredsAll.forEach(function(r){ var k=[r.fighter||r.name,r.opponent].sort().join("__"); if(!mm.has(k))mm.set(k,[]); mm.get(k).push(r); });
+  var fights = Array.from(mm.values());
+  if (_v1PredFilter==="bets") fights = fights.filter(function(p){ return p.some(function(r){ return parseFloat(r.bet_size||r.units||0)>0; }); });
+  if (!fights.length) { c.innerHTML='<div class="no-event"><div class="no-event-title">No bets this week</div></div>'; return; }
+  c.innerHTML = fights.map(function(pair) {
+    var fa=pair[0], fb=pair[1]||{name:fa.opponent};
+    var hasBet=pair.some(function(r){ return parseFloat(r.bet_size||r.units||0)>0; });
+    return '<div class="pred-fight'+(hasBet?" has-bet":"")+'"><div class="pred-fight-header"><span class="pred-fight-wc">'+(fa.weight_class||"")+'</span>'+(hasBet?'<span class="badge badge-market">Bet</span>':"")+'</div><div class="pred-versus"><div class="pred-fighter"><div class="pred-fighter-name">'+(fa.fighter||fa.name||"--")+'</div>'+probBar(parseFloat(fa.predicted_probability||fa.win_prob||0))+oddsChip(fa.Odds||fa.odds_numeric)+'</div><div class="pred-vs-center"><span class="pred-vs-text">VS</span></div><div class="pred-fighter right"><div class="pred-fighter-name">'+(fb.fighter||fb.name||fa.opponent||"--")+'</div>'+probBar(parseFloat(fb.predicted_probability||fb.win_prob||0))+oddsChip(fb.Odds||fb.odds_numeric)+'</div></div></div>';
+  }).join("");
+}
+
+async function loadV1Results() {
+  var r2 = await Promise.all([getV1Titles(), getV1AllResults()]);
+  var titles = r2[0], results = r2[1];
+  if (!results||!results.length) return;
+  var normR = results.map(function(r){ return Object.assign({},r,{bet_size:r.bet_size||r.units||"0"}); });
+  var m = calcMetrics(normR);
+  var bets = results.filter(function(r){ return parseFloat(r.bet_size||r.units||0)>0; });
+  // Sort by most recent first (reverse order since usually ordered chronologically)
+  bets = bets.slice().reverse();
+  var el = function(id){ return document.getElementById(id); };
+  if(el("v1r-bets")) el("v1r-bets").textContent = m.total_bets;
+  if(el("v1r-wl")) el("v1r-wl").textContent = m.winning_bets+"W / "+m.losing_bets+"L";
+  if(el("v1r-wr")) el("v1r-wr").textContent = m.win_rate+"%";
+  if(el("v1r-rtp")) { el("v1r-rtp").textContent=m.rtp+"%"; el("v1r-rtp-card")&&el("v1r-rtp-card").classList.add(parseFloat(m.rtp)>=96?"positive":"negative"); }
+  if(el("v1r-net")) { el("v1r-net").textContent=(parseFloat(m.net_units)>=0?"+":"")+m.net_units+"u"; el("v1r-net-card")&&el("v1r-net-card").classList.add(parseFloat(m.net_units)>=0?"positive":"negative"); }
+  if(el("v1r-count")) el("v1r-count").textContent = bets.length+" bets";
+  if(el("v1r-tbody")) {
+    el("v1r-tbody").innerHTML = bets.length ? bets.map(function(r){
+      var won=r.won==="1"||r.won===1; var net=parseFloat(r.net||r.profit||0); var bs=parseFloat(r.bet_size||r.units||0);
+      return '<tr><td class="td-name">'+(r.name||r.fighter||"--")+'</td><td class="td-mono">'+(r.opponent||"--")+'</td><td>'+(won?'<span class="badge badge-won">W</span>':'<span class="badge badge-lost">L</span>')+'</td><td class="td-mono">'+fmtOdds(r.Odds||r.odds_numeric)+'</td><td class="td-mono" data-val="bet_size" data-raw="'+bs+'">'+fmtUnits(bs)+'</td><td class="'+pnlClass(net)+'" data-val="net" data-raw="'+net+'">'+fmtPnL(net)+'</td><td style="font-size:12px;color:var(--text-muted);">'+(r.event_name||r.event||"--")+'</td></tr>';
+    }).join("") : '<tr><td colspan="7" class="alert-empty">No V1 bets recorded</td></tr>';
+    makeSortable(el("v1r-table"));
+  }
+  var recentName = titles.recent || null;
+  if (recentName && el("v1r-recent-title")) {
+    el("v1r-recent-title").textContent = recentName;
+    var recentRows = results.filter(function(r){ return (r.event_name||r.event||"").toLowerCase().includes((recentName||"").toLowerCase()) && parseFloat(r.bet_size||r.units||0)>0; });
+    if(el("v1r-tbody-recent")) el("v1r-tbody-recent").innerHTML = recentRows.length ? recentRows.map(function(r){
+      var won=r.won==="1"||r.won===1; var net=parseFloat(r.net||r.profit||0); var bs=parseFloat(r.bet_size||r.units||0); var prob=parseFloat(r.predicted_probability||r.win_prob||0);
+      return '<tr><td class="td-name">'+(r.name||r.fighter||"--")+'</td><td class="td-mono">'+(r.opponent||"--")+'</td><td>'+(won?'<span class="badge badge-won">W</span>':'<span class="badge badge-lost">L</span>')+'</td><td class="td-mono">'+fmtOdds(r.Odds||r.odds_numeric)+'</td><td class="td-mono">'+fmtUnits(bs)+'</td><td>'+probBar(isNaN(prob)?0:prob)+'</td><td class="'+pnlClass(net)+'">'+fmtPnL(net)+'</td></tr>';
+    }).join("") : '<tr><td colspan="7" class="alert-empty">No V1 bets for this event</td></tr>';
+  }
+}
+
+function v1ResultsTab(tab) {
+  _v1ResultsActiveTab = tab;
+  document.getElementById("v1rt-all").classList.toggle("active", tab==="all");
+  document.getElementById("v1rt-recent").classList.toggle("active", tab==="recent");
+  document.getElementById("v1r-panel-all").style.display = tab==="all" ? "" : "none";
+  document.getElementById("v1r-panel-recent").style.display = tab==="recent" ? "" : "none";
+}
+
+async function loadV1Statistics() {
+  var stats = await getV1Stats();
+  var sl = document.getElementById("v1s-loading"), sc = document.getElementById("v1s-content");
+  if(sl) sl.style.display = "none";
+  if (!stats) { if(sc){ sc.innerHTML='<div class="alert alert-info">No V1 statistics available yet.</div>'; sc.style.display="block"; } return; }
+  if(sc) sc.style.display = "block";
+  var perf=stats.overall_performance||{}, bsObj=stats.basic_statistics||{}, tt=stats.t_test||{}, mon=stats.monthly_performance||[], bsd=stats.bet_size_distribution||{};
+  var rawBets = stats._raw_bets || [];
+  var el = function(id){ return document.getElementById(id); };
+
+  if(perf.rtp_pct!==undefined&&el("v1s-rtp")){ el("v1s-rtp").textContent=parseFloat(perf.rtp_pct).toFixed(1)+"%"; el("v1s-rtp-card")&&el("v1s-rtp-card").classList.add(parseFloat(perf.rtp_pct)>=96?"positive":"negative"); }
+  if(perf.win_rate_pct!==undefined&&el("v1s-wr")){ el("v1s-wr").textContent=parseFloat(perf.win_rate_pct).toFixed(1)+"%"; el("v1s-wr-sub")&&(el("v1s-wr-sub").textContent=(perf.total_wins||0)+"W / "+(perf.total_losses||0)+"L"); }
+  if(perf.net_units!==undefined&&el("v1s-net")){ var n2=parseFloat(perf.net_units); el("v1s-net").textContent=(n2>=0?"+":"")+n2.toFixed(2); el("v1s-net-card")&&el("v1s-net-card").classList.add(n2>=0?"positive":"negative"); }
+  if(bsd.mean_units&&el("v1s-avgbet")) el("v1s-avgbet").textContent=parseFloat(bsd.mean_units).toFixed(2);
+  if(perf.total_bets&&el("v1s-total")) el("v1s-total").textContent=perf.total_bets;
+  if(mon.length&&el("v1s-events")) el("v1s-events").textContent=mon.length;
+
+  if(tt.conclusion&&el("v1s-ttest-conclusion")){ var pass=tt.conclusion==="Reject H0"; el("v1s-ttest-conclusion").textContent=pass?"Edge Detected":"No Significant Edge"; el("v1s-ttest-conclusion").className="ttest-result "+(pass?"pass":"fail"); el("v1s-ttest-t")&&(el("v1s-ttest-t").textContent=fmt(tt.t_statistic,3)); el("v1s-ttest-p")&&(el("v1s-ttest-p").textContent=fmt(tt.p_value_one_sided,4)); el("v1s-ttest-sig")&&(el("v1s-ttest-sig").textContent=parseFloat(tt.p_value_one_sided)<0.05?"p < 0.05":"p >= 0.05"); el("v1s-ttest-n")&&(el("v1s-ttest-n").textContent=bsObj.count||perf.total_bets||"--"); }
+
+  // Monthly table
+  if(mon.length&&el("v1s-monthly-tbody")) el("v1s-monthly-tbody").innerHTML=mon.slice().reverse().map(function(m){ var n=parseFloat(m.net_units||0); return '<tr><td class="td-mono">'+m.month+'</td><td class="td-mono">'+m.bets+'</td><td class="td-mono">'+fmt(m.win_rate,1)+'%</td><td class="td-mono">'+fmt(m.units_staked,2)+'u</td><td class="'+pnlClass(n)+'">'+fmtPnL(n)+'</td><td class="td-mono '+(parseFloat(m.rtp)>=96?'td-positive':'td-negative')+'">'+fmt(m.rtp,1)+'%</td></tr>'; }).join("");
+  else if(el("v1s-monthly-tbody")) el("v1s-monthly-tbody").innerHTML='<tr><td colspan="6" class="alert-empty">No monthly data available</td></tr>';
+
+  if (!_v1ChartBuilt && mon.length) {
+    _v1ChartBuilt = true;
+    var cd = chartDefaults();
+    // Helper: derive total_return if not in data
+    function getReturnV1(row) {
+      var tr = parseFloat(row.total_return);
+      if (!isNaN(tr) && row.total_return !== "" && row.total_return !== undefined) return tr;
+      var bs = parseFloat(row.bet_size || row.units || 0);
+      var net = parseFloat(row.net || row.profit || 0);
+      return bs + net;
+    }
+
+    // Cumulative P&L line chart
+    if(el("v1s-chart-cumulative")) {
+      var cumValues=[],cum=0;
+      mon.forEach(function(m){ cum+=parseFloat(m.net_units||0); cumValues.push(parseFloat(cum.toFixed(2))); });
+      new Chart(el("v1s-chart-cumulative").getContext("2d"),{type:"line",data:{labels:mon.map(function(m){return m.month;}),datasets:[{label:"Cumulative Net Units",data:cumValues,borderColor:"rgba(184,146,74,0.9)",backgroundColor:"rgba(184,146,74,0.08)",borderWidth:2,pointRadius:3,pointBackgroundColor:"rgba(184,146,74,0.9)",fill:true,tension:0.35}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{backgroundColor:cd.tooltipBg,bodyColor:cd.tooltipText,titleColor:cd.tooltipText,callbacks:{label:function(c){return(c.parsed.y>=0?"+":"")+c.parsed.y.toFixed(2)+"u";}}}},scales:{x:{ticks:{color:cd.textColor,font:{family:cd.font,size:10}},grid:{color:cd.gridColor}},y:{ticks:{color:cd.textColor,font:{family:cd.font,size:10},callback:function(v){return(v>=0?"+":"")+v.toFixed(1)+"u";}},grid:{color:cd.gridColor}}}}});
+    }
+
+    // Monthly bar chart
+    if(el("v1s-chart-monthly")) {
+      new Chart(el("v1s-chart-monthly").getContext("2d"),{type:"bar",data:{labels:mon.map(function(m){return m.month;}),datasets:[{label:"Net Units",data:mon.map(function(m){return parseFloat(m.net_units||0);}),backgroundColor:mon.map(function(m){return parseFloat(m.net_units||0)>=0?"rgba(184,146,74,0.65)":"rgba(212,25,42,0.65)";}),borderRadius:2}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{backgroundColor:cd.tooltipBg,bodyColor:cd.tooltipText,titleColor:cd.tooltipText,callbacks:{label:function(c){return(c.parsed.y>=0?"+":"")+c.parsed.y.toFixed(2)+"u";}}}},scales:{x:{ticks:{color:cd.textColor,font:{family:cd.font,size:10}},grid:{color:cd.gridColor}},y:{ticks:{color:cd.textColor,font:{family:cd.font,size:10},callback:function(v){return(v>=0?"+":"")+v.toFixed(1)+"u";}},grid:{color:cd.gridColor}}}}});
+    }
+
+    // RTP by odds bracket
+    if(el("v1s-chart-rtp-odds") && rawBets.length) {
+      var oB={"Big Fav (<-200)":{s:0,r:0},"Fav (-200/-101)":{s:0,r:0},"Pick'em":{s:0,r:0},"Dog (+101/+200)":{s:0,r:0},"Big Dog (>+200)":{s:0,r:0}};
+      rawBets.forEach(function(row){var odds=parseFloat(row.Odds||0),bs=parseFloat(row.bet_size||row.units||0),ret=getReturnV1(row);if(!odds||bs<=0)return;var k=odds<-200?"Big Fav (<-200)":odds<-100?"Fav (-200/-101)":odds<=100?"Pick'em":odds<=200?"Dog (+101/+200)":"Big Dog (>+200)";oB[k].s+=bs;oB[k].r+=ret;});
+      var oL=Object.keys(oB),oRtp=oL.map(function(k){return oB[k].s>0?parseFloat((oB[k].r/oB[k].s*100).toFixed(1)):0;});
+      new Chart(el("v1s-chart-rtp-odds").getContext("2d"),{type:"bar",data:{labels:oL,datasets:[{label:"RTP %",data:oRtp,backgroundColor:oRtp.map(function(v){return v>=96?"rgba(184,146,74,0.7)":"rgba(212,25,42,0.65)";}),borderRadius:2}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{backgroundColor:cd.tooltipBg,bodyColor:cd.tooltipText,titleColor:cd.tooltipText,callbacks:{label:function(c){return c.parsed.y.toFixed(1)+"%";}}}},scales:{x:{ticks:{color:cd.textColor,font:{family:cd.font,size:9}},grid:{color:cd.gridColor}},y:{ticks:{color:cd.textColor,font:{family:cd.font,size:10},callback:function(v){return v+"%";}},grid:{color:cd.gridColor}}}}});
+    }
+
+    // Bet size distribution bar chart
+    if(el("v1s-chart-betdist") && bsd.units_by_bucket) {
+      var b=bsd.units_by_bucket;
+      new Chart(el("v1s-chart-betdist").getContext("2d"),{type:"bar",data:{labels:["1u","2u","3u","4u","5u"],datasets:[{label:"Count",data:[b["0-1"]||0,b["1-2"]||0,b["2-3"]||0,b["3-4"]||0,b["4-5"]||0],backgroundColor:"rgba(184,146,74,0.6)",borderColor:"rgba(184,146,74,0.9)",borderWidth:1,borderRadius:2}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{backgroundColor:cd.tooltipBg,bodyColor:cd.tooltipText,titleColor:cd.tooltipText}},scales:{x:{ticks:{color:cd.textColor,font:{family:cd.font,size:10}},grid:{color:cd.gridColor}},y:{ticks:{color:cd.textColor,font:{family:cd.font,size:10}},grid:{color:cd.gridColor}}}}});
+    }
+
+    // RTP by bet size
+    if(el("v1s-chart-betsize") && rawBets.length) {
+      var bBuckets={"1u":{s:0,r:0},"2u":{s:0,r:0},"3u":{s:0,r:0}};
+      rawBets.forEach(function(row){var bs=parseFloat(row.bet_size||row.units||0),ret=getReturnV1(row);if(bs<=0)return;var k=bs<1.5?"1u":bs<2.5?"2u":"3u";bBuckets[k].s+=bs;bBuckets[k].r+=ret;});
+      var bL=Object.keys(bBuckets),bRtp=bL.map(function(k){return bBuckets[k].s>0?parseFloat((bBuckets[k].r/bBuckets[k].s*100).toFixed(1)):0;});
+      new Chart(el("v1s-chart-betsize").getContext("2d"),{type:"bar",data:{labels:bL,datasets:[{label:"RTP %",data:bRtp,backgroundColor:bRtp.map(function(v){return v>=96?"rgba(184,146,74,0.7)":"rgba(212,25,42,0.65)";}),borderRadius:2}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{backgroundColor:cd.tooltipBg,bodyColor:cd.tooltipText,titleColor:cd.tooltipText,callbacks:{label:function(c){return c.parsed.y.toFixed(1)+"%";}}}},scales:{x:{ticks:{color:cd.textColor,font:{family:cd.font,size:10}},grid:{color:cd.gridColor}},y:{ticks:{color:cd.textColor,font:{family:cd.font,size:10},callback:function(v){return v+"%";}},grid:{color:cd.gridColor}}}}});
+    }
+
+    // Win/Loss streak analysis
+    if(el("v1s-streaks-content") && rawBets.length) {
+      var maxW=0,curW=0,maxL=0,curL=0,streaks=[];
+      rawBets.forEach(function(row){
+        var won=row.won==="1"||row.won===1;
+        if(won){curW++;if(curL>0){streaks.push({type:"L",len:curL});curL=0;}if(curW>maxW)maxW=curW;}
+        else{curL++;if(curW>0){streaks.push({type:"W",len:curW});curW=0;}if(curL>maxL)maxL=curL;}
+      });
+      if(curW>0)streaks.push({type:"W",len:curW});
+      if(curL>0)streaks.push({type:"L",len:curL});
+      el("v1s-streaks-content").innerHTML='<div class="grid-2" style="gap:12px;margin-bottom:16px;"><div class="stat-card"><div class="stat-label">Longest Win Streak</div><div class="stat-value" style="color:var(--green)">'+maxW+'</div><div class="stat-sub">consecutive wins</div></div><div class="stat-card"><div class="stat-label">Longest Loss Streak</div><div class="stat-value" style="color:var(--red)">'+maxL+'</div><div class="stat-sub">consecutive losses</div></div></div><div style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.12em;">Streak History (W/L)</div><div style="display:flex;flex-wrap:wrap;gap:3px;">'+streaks.map(function(s){var c=s.type==="W"?"#22c55e":"#d4192a";return'<span style="font-family:var(--font-mono);font-size:10px;color:'+c+';background:'+c+'15;border:1px solid '+c+'30;padding:2px 6px;border-radius:2px;">'+s.type+s.len+'</span>';}).join("")+'</div>';
+    }
+
+    // Odds vs actual win rate scatter
+    if(el("v1s-chart-oddswin") && rawBets.length) {
+      var oBrackets=[{label:"<-400",min:-9999,max:-401},{label:"-400/-201",min:-400,max:-201},{label:"-200/-101",min:-200,max:-101},{label:"-100/+100",min:-100,max:100},{label:"+101/+200",min:101,max:200},{label:"+201/+400",min:201,max:400},{label:">+400",min:401,max:9999}];
+      var oData=oBrackets.map(function(br){var total=0,wins=0,implP=0,count=0;rawBets.forEach(function(row){var odds=parseFloat(row.Odds||0);if(odds>=br.min&&odds<=br.max){total++;if(row.won==="1"||row.won===1)wins++;var ip=odds<0?Math.abs(odds)/(Math.abs(odds)+100):100/(odds+100);implP+=ip;count++;}});return{label:br.label,wr:total>0?wins/total*100:null,impl:count>0?implP/count*100:null,total};});
+      var validData=oData.filter(function(d){return d.wr!==null&&d.total>=3;});
+      new Chart(el("v1s-chart-oddswin").getContext("2d"),{type:"bar",data:{labels:validData.map(function(d){return d.label;}),datasets:[{label:"Actual Win %",data:validData.map(function(d){return parseFloat(d.wr.toFixed(1));}),backgroundColor:"rgba(184,146,74,0.65)",borderRadius:2},{label:"Market Implied %",data:validData.map(function(d){return d.impl?parseFloat(d.impl.toFixed(1)):null;}),backgroundColor:"rgba(59,130,246,0.45)",borderRadius:2}]},options:{responsive:true,plugins:{legend:{labels:{color:cd.textColor,font:{family:cd.font,size:10}}},tooltip:{backgroundColor:cd.tooltipBg,bodyColor:cd.tooltipText,titleColor:cd.tooltipText,callbacks:{label:function(c){return c.dataset.label+": "+c.parsed.y.toFixed(1)+"%";}}}},scales:{x:{ticks:{color:cd.textColor,font:{family:cd.font,size:9}},grid:{color:cd.gridColor}},y:{ticks:{color:cd.textColor,font:{family:cd.font,size:10},callback:function(v){return v+"%";}},grid:{color:cd.gridColor}}}}});
+    }
+  }
+}
+
+function showV1VizTab(id, btn) {
+  document.querySelectorAll("#v1s-viz-tabs .viz-tab").forEach(function(b){b.classList.remove("active");});
+  document.querySelectorAll("#v1s-content .viz-panel").forEach(function(p){p.classList.remove("active");});
+  var panel = document.getElementById("v1viz-" + id);
+  if (panel) panel.classList.add("active");
+  if (btn) btn.classList.add("active");
+}
+
+function showV1Panel(panel) {
+  document.querySelectorAll(".v1-panel").forEach(function(el){el.style.display=el.dataset.panel===panel?"":"none";});
+  document.querySelectorAll(".v1-subnav-tab,.v1-nav-link").forEach(function(btn){btn.classList.toggle("active",btn.dataset.panel===panel);});
+  var ov=document.getElementById("v1-overlay"); if(ov) ov.scrollTop=0;
+}
+
+// ── Build V2 stats from raw results CSV if JSON not available ──────────────
+function buildStatsFromResults(rows) {
+  var bets = rows.filter(function(r){ return parseFloat(r.bet_size||0) > 0; });
+  if (!bets.length) return null;
+  var wins = bets.filter(function(r){ return r.won === "1" || r.won === 1; });
+  var staked = bets.reduce(function(s,r){ return s + parseFloat(r.bet_size||0); }, 0);
+  var ret = bets.reduce(function(s,r){ return s + parseFloat(r.total_return||0); }, 0);
+  var net = ret - staked;
+  var rtp = staked > 0 ? ret/staked*100 : 0;
+  var wr = bets.length > 0 ? wins.length/bets.length*100 : 0;
+  // Monthly
+  var mm = new Map();
+  bets.forEach(function(r){
+    var d = r.date_added||r.date||"";
+    var mo = d.length >= 7 ? d.substring(0,7) : "Unknown";
+    if (!mm.has(mo)) mm.set(mo, {bets:0,wins:0,staked:0,ret:0});
+    var m = mm.get(mo);
+    var bs = parseFloat(r.bet_size||0);
+    m.bets++; m.staked+=bs; m.ret+=parseFloat(r.total_return||0);
+    if (r.won==="1"||r.won===1) m.wins++;
+  });
+  var monthly = Array.from(mm.entries()).sort(function(a,b){ return a[0].localeCompare(b[0]); }).map(function(e){
+    var mo=e[0], m=e[1];
+    return { month:mo, bets:m.bets, wins:m.wins, win_rate:m.bets>0?m.wins/m.bets*100:0, units_staked:m.staked, net_units:m.ret-m.staked, rtp:m.staked>0?m.ret/m.staked*100:0 };
+  });
+  var meanU = staked / bets.length;
+  var bsd = {"0-1":0,"1-2":0,"2-3":0,"3-4":0,"4-5":0};
+  bets.forEach(function(r){ var bs=parseFloat(r.bet_size||0); if(bs<1)bsd["0-1"]++; else if(bs<2)bsd["1-2"]++; else if(bs<3)bsd["2-3"]++; else if(bs<4)bsd["3-4"]++; else bsd["4-5"]++; });
+  // T-test
+  var mults = bets.map(function(r){ var bs=parseFloat(r.bet_size||0),tr=parseFloat(r.total_return||0); return bs>0?tr/bs:0; });
+  var n=mults.length, mean=mults.reduce(function(s,x){return s+x;},0)/n;
+  var variance=mults.reduce(function(s,x){return s+Math.pow(x-mean,2);},0)/(n-1);
+  var se=Math.sqrt(variance/n), t=se>0?(mean-0.96)/se:0;
+  function normCDF(z){var a1=0.254829592,a2=-0.284496736,a3=1.421413741,a4=-1.453152027,a5=1.061405429,p=0.3275911;var sign=z<0?-1:1;var absZ=Math.abs(z);var t2=1/(1+p*absZ);var poly=((((a5*t2+a4)*t2+a3)*t2+a2)*t2+a1)*t2;return 0.5*(1+sign*(1-poly*Math.exp(-absZ*absZ/2)));}
+  var pVal = 1 - normCDF(t);
+  return {
+    overall_performance: { total_bets:bets.length, total_wins:wins.length, total_losses:bets.length-wins.length, win_rate_pct:wr, net_units:net, rtp_pct:rtp },
+    basic_statistics: { count:bets.length, mean_return:mean },
+    t_test: { t_statistic:t, p_value_one_sided:pVal, conclusion:pVal<0.05?"Reject H0":"Fail to Reject H0" },
+    monthly_performance: monthly,
+    bet_size_distribution: { mean_units:meanU, units_by_bucket:bsd },
+    _raw_bets: bets
+  };
+}
+
+function renderV2Stats(stats) {
+  var el = function(id){ return document.getElementById(id); };
+  var perf=stats.overall_performance||{}, tt=stats.t_test||{}, mon=stats.monthly_performance||[], bsd=stats.bet_size_distribution||{};
+  var cd = chartDefaults();
+  if (el("stats-loading")) el("stats-loading").style.display = "none";
+  if (el("stats-content")) el("stats-content").style.display = "block";
+  if (perf.rtp_pct!==undefined&&el("st-rtp")){ el("st-rtp").textContent=parseFloat(perf.rtp_pct).toFixed(1)+"%"; el("st-rtp-card")&&el("st-rtp-card").classList.add(parseFloat(perf.rtp_pct)>=96?"positive":"negative"); }
+  if (perf.win_rate_pct!==undefined&&el("st-wr")){ el("st-wr").textContent=parseFloat(perf.win_rate_pct).toFixed(1)+"%"; el("st-wr-sub")&&(el("st-wr-sub").textContent=(perf.total_wins||0)+"W / "+(perf.total_losses||0)+"L"); }
+  if (perf.net_units!==undefined&&el("st-net")){ var n=parseFloat(perf.net_units); el("st-net").textContent=(n>=0?"+":"")+n.toFixed(2); el("st-net-card")&&el("st-net-card").classList.add(n>=0?"positive":"negative"); }
+  if (bsd.mean_units&&el("st-avgbet")) el("st-avgbet").textContent=parseFloat(bsd.mean_units).toFixed(2);
+  if (mon.length&&el("st-events")) el("st-events").textContent=mon.length;
+  if (tt.conclusion&&el("ttest-conclusion")){ var pass=tt.conclusion==="Reject H0"; el("ttest-conclusion").textContent=pass?"Edge Detected":"No Significant Edge"; el("ttest-conclusion").className="ttest-result "+(pass?"pass":"fail"); el("ttest-t")&&(el("ttest-t").textContent=fmt(tt.t_statistic,3)); el("ttest-p")&&(el("ttest-p").textContent=fmt(tt.p_value_one_sided,4)); el("ttest-sig")&&(el("ttest-sig").textContent=parseFloat(tt.p_value_one_sided)<0.05?"p < 0.05":"p >= 0.05"); el("ttest-n")&&(el("ttest-n").textContent=perf.total_bets||"--"); }
+  var tbody = el("monthly-tbody");
+  if (mon.length&&tbody) tbody.innerHTML=mon.slice().reverse().map(function(m){var n=parseFloat(m.net_units||0);return '<tr><td class="td-mono">'+m.month+'</td><td class="td-mono">'+m.bets+'</td><td class="td-mono">'+fmt(m.win_rate,1)+'%</td><td class="td-mono">'+fmt(m.units_staked,2)+'u</td><td class="'+pnlClass(n)+'">'+fmtPnL(n)+'</td><td class="td-mono '+(parseFloat(m.rtp)>=96?'td-positive':'td-negative')+'">'+fmt(m.rtp,1)+'%</td></tr>';}).join("");
+  // Cumulative chart
+  if (mon.length&&el("chart-cumulative")&&!_cumulativeBuilt){_cumulativeBuilt=true;var cum=0,cumV=[];mon.forEach(function(m){cum+=parseFloat(m.net_units||0);cumV.push(parseFloat(cum.toFixed(2)));});new Chart(el("chart-cumulative").getContext("2d"),{type:"line",data:{labels:mon.map(function(m){return m.month;}),datasets:[{label:"Cumulative Net Units",data:cumV,borderColor:"rgba(212,25,42,0.9)",backgroundColor:"rgba(212,25,42,0.08)",borderWidth:2,pointRadius:3,pointBackgroundColor:"rgba(212,25,42,0.9)",fill:true,tension:0.35}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{backgroundColor:cd.tooltipBg,bodyColor:cd.tooltipText,titleColor:cd.tooltipText,callbacks:{label:function(c){return(c.parsed.y>=0?"+":"")+c.parsed.y.toFixed(2)+"u";}}}},scales:{x:{ticks:{color:cd.textColor,font:{family:cd.font,size:10}},grid:{color:cd.gridColor}},y:{ticks:{color:cd.textColor,font:{family:cd.font,size:10},callback:function(v){return(v>=0?"+":"")+v.toFixed(1)+"u";}},grid:{color:cd.gridColor}}}}});}
+  if (mon.length&&el("chart-monthly")&&!el("chart-monthly")._built){el("chart-monthly")._built=true;new Chart(el("chart-monthly").getContext("2d"),{type:"bar",data:{labels:mon.map(function(m){return m.month;}),datasets:[{label:"Net Units",data:mon.map(function(m){return parseFloat(m.net_units||0);}),backgroundColor:mon.map(function(m){return parseFloat(m.net_units||0)>=0?"rgba(34,197,94,0.65)":"rgba(212,25,42,0.65)";}),borderRadius:2}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{backgroundColor:cd.tooltipBg,bodyColor:cd.tooltipText,titleColor:cd.tooltipText,callbacks:{label:function(c){return(c.parsed.y>=0?"+":"")+c.parsed.y.toFixed(2)+"u";}}}},scales:{x:{ticks:{color:cd.textColor,font:{family:cd.font,size:10}},grid:{color:cd.gridColor}},y:{ticks:{color:cd.textColor,font:{family:cd.font,size:10},callback:function(v){return(v>=0?"+":"")+v.toFixed(1)+"u";}},grid:{color:cd.gridColor}}}}});}
+  if (bsd.units_by_bucket&&el("chart-betsize")&&!el("chart-betsize")._built){el("chart-betsize")._built=true;var b=bsd.units_by_bucket;new Chart(el("chart-betsize").getContext("2d"),{type:"bar",data:{labels:["<1u","1-2u","2-3u","3-4u","4-5u"],datasets:[{label:"Count",data:[b["0-1"]||0,b["1-2"]||0,b["2-3"]||0,b["3-4"]||0,b["4-5"]||0],backgroundColor:"rgba(212,25,42,0.6)",borderColor:"rgba(212,25,42,0.9)",borderWidth:1,borderRadius:2}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{backgroundColor:cd.tooltipBg,bodyColor:cd.tooltipText,titleColor:cd.tooltipText}},scales:{x:{ticks:{color:cd.textColor,font:{family:cd.font,size:10}},grid:{color:cd.gridColor}},y:{ticks:{color:cd.textColor,font:{family:cd.font,size:10}},grid:{color:cd.gridColor}}}}});}
+}
+</script>
+</body>
+</html>
