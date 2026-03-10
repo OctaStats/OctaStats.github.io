@@ -1,7 +1,7 @@
 {
   "v2": {
-    "upcoming_event": "",
-    "upcoming_date": "",
+    "upcoming_event": "UFC Fight Night: Emmett vs. Vallejos",
+    "upcoming_date": "2026-03-14",
     "recent_event": "",
     "recent_date": "",
     "data_base_url": "https://raw.githubusercontent.com/zwinship/OctaStats_UFC_Model_V2/main",
@@ -29,5 +29,5 @@
       "analysis_date": "2026-03-08 14:21:38"
     }
   },
-  "last_updated": ""
+  "last_updated": "2026-03-10T07:26:53.200366"
 }
