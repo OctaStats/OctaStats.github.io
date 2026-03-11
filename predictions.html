@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Predictions - OctaStats</title>
+  <meta name="description" content="V2 UFC fight predictions with win probabilities, finish type breakdown, bet sizes, and prop bets." />
+  <meta name="theme-color" content="#09090c" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <script src="assets/js/main.js"></script>
+</head>
+<body>
+
+<nav class="nav" role="navigation">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-brand"><span class="nav-brand-dot"></span>OctaStats</a>
+    <div class="nav-links">
+      <a href="index.html"       class="nav-link">Home</a>
+      <a href="predictions.html" class="nav-link active">Predictions</a>
+      <a href="results.html"     class="nav-link">Results</a>
+      <a href="statistics.html"  class="nav-link">Statistics</a>
+    </div>
+    <div class="nav-v1-toggle" role="button" tabindex="0">
+      <span class="nav-v1-toggle-option opt-v2 active-opt">V2</span>
+      <span class="nav-v1-toggle-option opt-v1">V1</span>
+    </div>
+    <div class="theme-toggle-slider" role="button" tabindex="0">
+      <span class="theme-toggle-option opt-dark active-opt">&#9790;</span>
+      <span class="theme-toggle-option opt-light">&#9728;</span>
+    </div>
+    <button class="nav-hamburger" aria-label="Open menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="nav-mobile-menu">
+  <a href="index.html"       class="nav-link">Home</a>
+  <a href="predictions.html" class="nav-link active">Predictions</a>
+  <a href="results.html"     class="nav-link">Results</a>
+  <a href="statistics.html"  class="nav-link">Statistics</a>
+  <div class="nav-mobile-controls">
+    <span class="nav-mobile-label">Model</span>
+    <div class="nav-v1-toggle" style="cursor:pointer;">
+      <span class="nav-v1-toggle-option opt-v2 active-opt">V2</span>
+      <span class="nav-v1-toggle-option opt-v1">V1</span>
+    </div>
+    <span class="nav-mobile-label" style="margin-left:12px;">Theme</span>
+    <div class="theme-toggle-slider" style="cursor:pointer;">
+      <span class="theme-toggle-option opt-dark active-opt">&#9790;</span>
+      <span class="theme-toggle-option opt-light">&#9728;</span>
+    </div>
+  </div>
+</div>
+
+<main class="page">
+
+  <div class="page-header">
+    <div class="page-eyebrow">V2 Model</div>
+    <h1 class="page-title">Fight Predictions</h1>
+    <p class="page-subtitle" id="event-subtitle">Loading upcoming event...</p>
+  </div>
+
+  <div class="stat-grid stagger mb-24" style="grid-template-columns:repeat(auto-fit,minmax(120px,1fr));">
+    <div class="stat-card accent"><div class="stat-label">Fights on Card</div><div class="stat-value" id="s-fights">--</div></div>
+    <div class="stat-card"><div class="stat-label">Bets Flagged</div><div class="stat-value" id="s-bets">--</div></div>
+    <div class="stat-card"><div class="stat-label">Total Units</div><div class="stat-value" id="s-units">--</div></div>
+    <div class="stat-card"><div class="stat-label">Props Flagged</div><div class="stat-value" id="s-props">--</div></div>
+  </div>
+
+  <!-- Parlay bar — shown when 2+ bets exist -->
+  <div id="parlay-bar" style="display:none;margin-bottom:20px;">
+    <a id="parlay-dk-btn" href="#" target="_blank" rel="noopener" class="parlay-big-btn">
+      <span class="parlay-big-label">OCTASTATS PARLAY</span>
+      <span id="parlay-odds-chip" class="parlay-big-odds" style="display:none;"></span>
+      <span class="parlay-big-sep">·</span>
+      <img src="assets/img/dk.png" alt="DraftKings" class="parlay-big-dk">
+      <span class="parlay-big-cta">Bet on DraftKings</span>
+    </a>
+    <!-- Parlay tracking history (subtle) -->
+    <div id="parlay-history" style="margin-top:10px;display:none;"></div>
+  </div>
+
+  <!-- Bets Only — no filter needed, always shows bets -->
+
+  <div id="fight-card-container">
+    <div class="loading"><div class="spinner"></div>Loading predictions...</div>
+  </div>
+
+</main>
+
+<footer>
+  <p>OctaStats &nbsp;&middot;&nbsp; Data: UFCStats.com &nbsp;&middot;&nbsp; Odds: BestFightOdds.com</p>
+  <p class="mt-4">
+    <a href="https://github.com/zwinship" target="_blank" rel="noopener">GitHub</a>
+    &nbsp;&middot;&nbsp;
+    <a href="https://zwinship.github.io/" target="_blank" rel="noopener">Portfolio</a>
+  </p>
+</footer>
+
+<!-- V1 Overlay (same content structure as index.html) -->
+<div class="v1-overlay" id="v1-overlay" style="display:none;">
+  <!-- All panels defined in index.html are reproduced here for standalone page use -->
+  <div class="v1-page v1-panel" data-panel="home" style="display:none;">
+    <div class="v1-hero-section">
+      <div class="v1-heritage-badge"><span class="v1-heritage-dot"></span>Legacy Model · Superseded by V2</div>
+      <h1 class="v1-hero-title">OctaStats V1 Model</h1>
+      <p style="color:var(--text-muted);max-width:480px;font-size:14px;line-height:1.65;margin-bottom:20px;">The original OctaStats linear regression model with discrete 0 to 3 unit bet sizing.</p>
+      <div class="hero-actions">
+        <button class="btn btn-outline" onclick="showV1Panel('predictions')">V1 Predictions</button>
+        <button class="btn btn-outline" onclick="showV1Panel('results')">V1 Results</button>
+        <button class="v1-close-btn btn" style="background:var(--red);color:#fff;">Back to V2</button>
+      </div>
+      <div class="v1-hero-bg" aria-hidden="true">V1</div>
+    </div>
+    <div class="stat-grid stagger mb-24">
+      <div class="stat-card"><div class="stat-label">Total Bets</div><div class="stat-value" id="v1h-total">--</div></div>
+      <div class="stat-card winrate-card"><div class="stat-label">Win Rate</div><div class="stat-value" id="v1h-wr">--</div></div>
+      <div class="stat-card" id="v1h-rtp-card"><div class="stat-label">RTP</div><div class="stat-value" id="v1h-rtp">--</div></div>
+      <div class="stat-card" id="v1h-net-card"><div class="stat-label">Net Units</div><div class="stat-value" id="v1h-net">--</div></div>
+    </div>
+  </div>
+  <div class="v1-page v1-panel" data-panel="predictions">
+    <div class="page-header">
+      <div class="page-eyebrow">V1 Legacy Model</div>
+      <h1 class="page-title" style="color:var(--text-secondary);">V1 Fight Predictions</h1>
+      <p class="page-subtitle">Linear regression model</p>
+    </div>
+    <div class="stat-grid stagger mb-20" style="grid-template-columns:repeat(auto-fit,minmax(110px,1fr));">
+      <div class="stat-card"><div class="stat-label">Fights</div><div class="stat-value" id="v1p-fights">--</div></div>
+      <div class="stat-card"><div class="stat-label">Bets</div><div class="stat-value" id="v1p-bets">--</div></div>
+      <div class="stat-card"><div class="stat-label">Total Units</div><div class="stat-value" id="v1p-units">--</div></div>
+    </div>
+    <!-- V1 bets only — no filter -->
+    <div id="v1-parlay-bar" style="display:none;margin-bottom:16px;">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <span style="font-family:var(--font-display);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.10em;color:var(--text-secondary);">OCTASTATS PARLAY</span>
+        <a id="v1-parlay-dk-btn" href="#" target="_blank" rel="noopener" class="pred-bet-btn" style="border-color:rgba(184,146,74,0.4);background:rgba(184,146,74,0.08);color:#b8924a;">
+          <img src="assets/img/dk.png" alt="DraftKings" style="height:11px;opacity:0.85;vertical-align:middle;">
+        </a>
+      </div>
+    </div>
+    <div id="v1-pred-container"><div class="loading"><div class="spinner"></div>Loading...</div></div>
+  </div>
+  <div class="v1-page v1-panel" data-panel="results" style="display:none;">
+    <div class="page-header">
+      <div class="page-eyebrow">V1 Legacy Model</div>
+      <h1 class="page-title" style="color:var(--text-secondary);">V1 Results</h1>
+    </div>
+    <div class="stat-grid stagger mb-24">
+      <div class="stat-card"><div class="stat-label">Total Bets</div><div class="stat-value" id="v1r-bets">--</div><div class="stat-sub" id="v1r-wl">--</div></div>
+      <div class="stat-card winrate-card"><div class="stat-label">Win Rate</div><div class="stat-value" id="v1r-wr">--</div></div>
+      <div class="stat-card" id="v1r-rtp-card"><div class="stat-label">RTP</div><div class="stat-value" id="v1r-rtp">--</div></div>
+      <div class="stat-card" id="v1r-net-card"><div class="stat-label">Net Units</div><div class="stat-value" id="v1r-net">--</div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">All V1 Bets</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);" id="v1r-count"></span></div>
+      <div class="table-wrap">
+        <table id="v1r-table"><thead><tr><th data-sort="name">Fighter</th><th>Opponent</th><th>Result</th><th data-sort="Odds">Odds</th><th data-sort="bet_size">Bet</th><th data-sort="net">P&amp;L</th><th>Event</th></tr></thead>
+        <tbody id="v1r-tbody"><tr><td colspan="7" class="alert-empty">Loading...</td></tr></tbody></table>
+      </div>
+    </div>
+  </div>
+  <div class="v1-page v1-panel" data-panel="statistics" style="display:none;">
+    <div class="page-header">
+      <div class="page-eyebrow">V1 Legacy Model</div>
+      <h1 class="page-title" style="color:var(--text-secondary);">V1 Statistics</h1>
+    </div>
+    <div id="v1s-loading" class="loading"><div class="spinner"></div>Loading V1 statistics...</div>
+    <div id="v1s-content" style="display:none;">
+      <div class="stat-grid stagger mb-24">
+        <div class="stat-card" id="v1s-rtp-card"><div class="stat-label">All-time RTP</div><div class="stat-value" id="v1s-rtp">--</div><div class="stat-sub">96% = break-even</div></div>
+        <div class="stat-card winrate-card"><div class="stat-label">Win Rate</div><div class="stat-value" id="v1s-wr">--</div><div class="stat-sub" id="v1s-wr-sub">--</div></div>
+        <div class="stat-card" id="v1s-net-card"><div class="stat-label">Net Units</div><div class="stat-value" id="v1s-net">--</div></div>
+        <div class="stat-card"><div class="stat-label">Avg Bet</div><div class="stat-value" id="v1s-avgbet">--</div></div>
+      </div>
+      <div class="card mb-24">
+        <div class="card-header"><span class="card-title">Monthly P&amp;L</span></div>
+        <div class="card-body"><div class="chart-wrap"><canvas id="v1s-chart-monthly"></canvas></div></div>
+      </div>
+      <h2 class="section-title">Monthly Breakdown</h2>
+      <div class="card mb-24">
+        <div class="table-wrap">
+          <table><thead><tr><th>Month</th><th>Bets</th><th>Win Rate</th><th>Staked</th><th>Net Units</th><th>RTP</th></tr></thead>
+          <tbody id="v1s-monthly-tbody"><tr><td colspan="6" class="alert-empty">Loading...</td></tr></tbody></table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- /v1-overlay -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+// ── V2 Predictions ────────────────────────────────────────────────────────────
+let allFights = [], allProps = [];
+
+function renderFightCard() {
+  const container = document.getElementById("fight-card-container");
+
+  // Build matchup pairs keyed by sorted fighter names
+  const matchupMap = new Map();
+  allFights.forEach(function(row) {
+    const key = [row.fighter||row.name, row.opponent].sort().join("__");
+    if (!matchupMap.has(key)) matchupMap.set(key, []);
+    matchupMap.get(key).push(row);
+  });
+
+  // Build prop map
+  const propMap = new Map();
+  allProps.forEach(function(p) {
+    const key = [p.fighter_a, p.fighter_b].sort().join("__");
+    if (!propMap.has(key)) propMap.set(key, []);
+    propMap.get(key).push(p);
+  });
+
+  // Always bets only — filter to fights where at least one fighter is bet
+  let fights = Array.from(matchupMap.values()).filter(function(pair) {
+    return pair.length >= 2 && pair.some(function(r) { return parseFloat(r.bet_size) > 0; });
+  });
+
+  if (!fights.length) {
+    container.innerHTML = '<div class="no-event"><div class="no-event-icon">&#x1F94A;</div><div class="no-event-title">No Bets Recommended This Week</div><div class="no-event-sub">Predictions posted Friday morning before fight week</div></div>';
+    return;
+  }
+
+  container.innerHTML = fights.map(function(pair) { return buildFightHTML(pair, propMap); }).join("");
+}
+
+function buildFightHTML(pair, propMap) {
+  // Always put the fighter we are BETTING on the LEFT
+  // If we're betting fighter at index 1, swap the pair
+  let fa = pair[0], fb = pair[1];
+  const betA0 = parseFloat(fa.bet_size || 0) > 0;
+  const betB0 = parseFloat(fb.bet_size || 0) > 0;
+  if (!betA0 && betB0) { const tmp = fa; fa = fb; fb = tmp; }
+
+  const matchupKey  = [fa.fighter||fa.name, fa.opponent].sort().join("__");
+  const props       = propMap.get(matchupKey) || [];
+  const betA        = parseFloat(fa.bet_size || 0) > 0;
+  const betB        = parseFloat(fb.bet_size || 0) > 0;
+  const wc          = fa.weight_class || fb.weight_class || "";
+
+  // Finish bars come from whichever row has them (fight-level)
+  const src   = (fa.prob_ko_tko !== undefined && fa.prob_ko_tko !== "" && fa.prob_ko_tko !== "nan") ? fa : fb;
+  const ko    = src.prob_ko_tko;
+  const sub   = src.prob_submission;
+  const dec   = src.prob_decision;
+  const hasFinish = ko !== undefined && ko !== "" && ko !== "nan" && ko !== "None";
+
+  function side(r, isBet, isRight) {
+    const name    = r.fighter || r.name || "--";
+    const wp      = parseFloat(r.predicted_probability || 0.5);
+    const edge    = parseFloat(r.betting_edge || 0);
+    const style   = r.career_style;
+    const iStyle  = r.predicted_infight_style;
+    const shifted = r.style_shift_predicted === "True" || r.style_shift_predicted === true;
+    const betSz   = parseFloat(r.bet_size || 0);
+    const dkLink  = r.dk_link || "";
+
+    const styleName = iStyle || style || "";
+    const styleEl   = styleName ? styleBadge(styleName, shifted) : "";
+
+    let betBtn = "";
+    if (isBet && betSz > 0) {
+      const btnUrl = dkLink || gamblyUrl(name + " moneyline");
+      betBtn = '<a href="' + btnUrl + '" target="_blank" rel="noopener" class="pred-bet-btn">' +
+        '<img src="assets/img/dk.png" alt="DraftKings" style="height:11px;opacity:0.85;vertical-align:middle;margin-right:5px;">' +
+        'Bet on DraftKings' +
+      '</a>';
+    }
+
+    const edgeSign  = edge > 0 ? "+" : "";
+    const edgeClass = edge > 0 ? "pred-edge positive" : "pred-edge";
+    const rightClass = isRight ? " pred-side--right" : "";
+
+    return "<div class='pred-side" + (isBet ? " pred-side--bet" : "") + rightClass + "'>" +
+      "<div class='pred-fighter-name" + (isBet ? " is-bet" : "") + "'>" + name + "</div>" +
+      (styleEl ? "<div class='pred-badges'>" + styleEl + "</div>" : "") +
+      probBar(wp) +
+      "<div class='pred-meta'>" +
+        oddsChip(r.Odds || r.odds_numeric) +
+        (edge !== 0 ? "<span class='" + edgeClass + "'>" + edgeSign + (edge * 100).toFixed(1) + "pp edge</span>" : "") +
+      "</div>" +
+      (isBet && betSz > 0 ? "<div class='pred-units-label'><span class='pred-units-badge'>" + betSz.toFixed(1) + "u</span></div>" : "") +
+      betBtn +
+    "</div>";
+  }
+
+  // VS is just a simple vertical divider label — no finish bars crammed in the middle
+  const vsBlock = "<div class='pred-vs-divider'><span class='pred-vs-text'>VS</span></div>";
+
+  // Finish bars sit in their own full-width row BELOW both fighters
+  const finishRow = hasFinish
+    ? "<div class='pred-finish-row'>" + finishBars(ko, sub, dec) + "</div>"
+    : "";
+
+  const header = "<div class='pred-fight-header'>" +
+    "<span class='pred-fight-wc'>" + wc + "</span>" +
+    "<span class='badge badge-market' style='background:rgba(212,25,42,0.12);border:1px solid rgba(212,25,42,0.3);color:var(--red);'>Recommended Bet</span>" +
+  "</div>";
+
+  const propSection = buildMatchupProps(matchupKey, props);
+
+  return "<div class='pred-fight has-bet'>" +
+    header +
+    "<div class='pred-versus'>" +
+      side(fa, betA, false) +
+      vsBlock +
+      side(fb, betB, true) +
+    "</div>" +
+    finishRow +
+    propSection +
+  "</div>";
+}
+
+// ── Prop display for a single matchup ────────────────────────────────────────
+function buildMatchupProps(matchupKey, propRows) {
+  if (!propRows || propRows.length === 0) return "";
+  const flagged = propRows.filter(function(p) { return p.flagged === "True" || p.flagged === true; });
+  const label   = flagged.length > 0 ? flagged.length + " prop" + (flagged.length > 1 ? "s" : "") + " flagged" : "view props";
+
+  // Group props: fight-level (goes distance / goes to decision) vs fighter-specific
+  const fightLevel = propRows.filter(function(p) {
+    const lbl = (p.prop_label || p.prop_type || "").toLowerCase();
+    return lbl.includes("fight ends") || lbl.includes("goes to decision") || lbl.includes("goes the distance") || lbl.includes("fight goes");
+  });
+  const fighterProps = propRows.filter(function(p) {
+    const lbl = (p.prop_label || p.prop_type || "").toLowerCase();
+    return !lbl.includes("fight ends") && !lbl.includes("goes to decision") && !lbl.includes("goes the distance") && !lbl.includes("fight goes");
+  });
+
+  // Group fighter props by fighter name (first word of prop label)
+  const byFighter = new Map();
+  fighterProps.forEach(function(p) {
+    const lbl = p.prop_label || p.prop_type || "";
+    // Fighter name is whatever comes before " wins by" or similar
+    const match = lbl.match(/^([A-Za-z\s'.-]+?)\s+wins\s+by/i);
+    const key = match ? match[1].trim() : "Other";
+    if (!byFighter.has(key)) byFighter.set(key, []);
+    byFighter.get(key).push(p);
+  });
+
+  function renderPropRow(p) {
+    const isFlagged = p.flagged === "True" || p.flagged === true;
+    const mProb     = parseFloat(p.model_prob || 0);
+    const edge      = parseFloat(p.market_edge || 0);
+    const hasMarket = p.market_implied_prob && p.market_implied_prob !== "" && p.market_implied_prob !== "None";
+    const edgeStr   = hasMarket ? (edge >= 0 ? "+" : "") + (edge * 100).toFixed(1) + "pp" : "";
+    const edgeCls   = edge > 0 ? "color:var(--green)" : edge < 0 ? "color:var(--text-muted)" : "";
+    return '<div class="prop-row' + (isFlagged ? " prop-row--flagged" : "") + '">' +
+      '<span class="prop-label">' + (p.prop_label || p.prop_type || "Prop") + '</span>' +
+      '<span class="prop-prob">' + (mProb * 100).toFixed(1) + '%</span>' +
+      (hasMarket ? '<span class="prop-market" style="' + edgeCls + '">' + edgeStr + '</span>' : '') +
+      (isFlagged ? '<span class="prop-flagged">&#9650; Edge</span>' : '') +
+    '</div>';
+  }
+
+  let sections = "";
+
+  if (fightLevel.length > 0) {
+    sections += '<div class="prop-group prop-group--fight">' +
+      '<div class="prop-group-header">Fight Outcome</div>' +
+      fightLevel.sort(function(a,b){ return parseFloat(b.model_prob||0)-parseFloat(a.model_prob||0); }).map(renderPropRow).join("") +
+    '</div>';
+  }
+
+  byFighter.forEach(function(props, fighter) {
+    sections += '<div class="prop-group">' +
+      '<div class="prop-group-header">' + fighter + '</div>' +
+      props.sort(function(a,b){ return parseFloat(b.model_prob||0)-parseFloat(a.model_prob||0); }).map(renderPropRow).join("") +
+    '</div>';
+  });
+
+  return '<div class="prop-accordion" data-matchup="' + matchupKey + '">' +
+    '<div class="prop-accordion-header" onclick="togglePropAccordion(this)">' +
+      '<div class="prop-accordion-header-left">' +
+        '<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" stroke="currentColor" stroke-width="1.2"/><line x1="5" y1="2.5" x2="5" y2="5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="5" cy="7" r="0.6" fill="currentColor"/></svg>' +
+        'PROPS &mdash; ' + label +
+      '</div>' +
+      '<span class="prop-accordion-chevron">&#9660;</span>' +
+    '</div>' +
+    '<div class="prop-accordion-body">' + sections + '</div>' +
+  '</div>';
+}
+
+// ── Parlay history display ─────────────────────────────────────────────────────
+async function loadParlayHistory() {
+  const rows = await fetchCSV(DATA_BASE + "/results/v2_parlay_results.csv");
+  const el = document.getElementById("parlay-history");
+  if (!el || !rows || !rows.length) return;
+  const recent = rows.slice(-5).reverse(); // last 5 parlays
+  const wins = rows.filter(function(r) { return r.all_won === "1" || r.all_won === 1; });
+  el.innerHTML = '<div style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted);margin-top:4px;">' +
+    'All-time parlay record: <span style="color:var(--text-secondary);">' + wins.length + 'W / ' + (rows.length - wins.length) + 'L</span>' +
+    ' &nbsp;&middot;&nbsp; Recent: ' +
+    recent.map(function(r) {
+      const won = r.all_won === "1" || r.all_won === 1;
+      return '<span style="color:' + (won ? 'var(--green)' : 'var(--text-muted)') + '">' + (won ? '✓' : '✗') + '</span>';
+    }).join(' ') +
+  '</div>';
+  el.style.display = "";
+}
+
+(async function() {
+  const [titles, preds, props] = await Promise.all([getFightTitles(), getV2Predictions(), getV2PropPredictions()]);
+
+  const eventName = titles.upcoming || titles.upcoming_event || null;
+  const eventDate = titles.upcoming_date || "";
+  const subEl = document.getElementById("event-subtitle");
+  if (subEl) {
+    subEl.textContent = eventName
+      ? (eventName + (eventDate ? " — " + new Date(eventDate + "T00:00:00").toLocaleDateString("en-US", {month:"short",day:"numeric",year:"numeric"}) : ""))
+      : "No event scheduled this week";
+  }
+
+  if (!preds || !preds.length) {
+    document.getElementById("fight-card-container").innerHTML = '<div class="no-event"><div class="no-event-icon">&#x1F94A;</div><div class="no-event-title">No Predictions Posted Yet</div><div class="no-event-sub">Predictions posted Friday morning before fight week</div></div>';
+    return;
+  }
+
+  allFights = preds;
+  allProps  = props || [];
+
+  const matchups = new Set(preds.map(function(r) { return [r.fighter||r.name, r.opponent].sort().join("__"); }));
+  const bets     = preds.filter(function(r) { return parseFloat(r.bet_size) > 0; });
+  const totalU   = bets.reduce(function(s,r) { return s + parseFloat(r.bet_size||0); }, 0);
+  const flaggedP = (props||[]).filter(function(p) { return p.flagged === "True" || p.flagged === true; });
+
+  document.getElementById("s-fights").textContent = matchups.size;
+  document.getElementById("s-bets").textContent   = bets.length;
+  document.getElementById("s-units").textContent  = totalU.toFixed(1) + "u";
+  document.getElementById("s-props").textContent  = flaggedP.length;
+
+  // Parlay bar — show when 2+ bets exist
+  if (bets.length >= 2) {
+    const parlayLink  = bets[0].dk_parlay_link || gamblyUrl(bets.map(function(r){return (r.fighter||r.name||"") + " moneyline";}).join(" and "));
+    const parlayOdds  = bets[0].parlay_combined_odds;
+    const parlayBar   = document.getElementById("parlay-bar");
+    const parlayBtn   = document.getElementById("parlay-dk-btn");
+    const oddsChipEl  = document.getElementById("parlay-odds-chip");
+    if (parlayBar && parlayBtn) {
+      parlayBtn.href = parlayLink;
+      if (parlayOdds && parlayOdds !== "" && parlayOdds !== "None") {
+        const oddsN = parseFloat(parlayOdds);
+        if (!isNaN(oddsN) && oddsChipEl) {
+          oddsChipEl.textContent = (oddsN > 0 ? "+" : "") + Math.round(oddsN);
+          oddsChipEl.style.display = "";
+        }
+      }
+      parlayBar.style.display = "";
+    }
+    loadParlayHistory();
+  }
+
+  renderFightCard();
+})();
+
+// V1 overlay shared logic (abbreviated - loads from shared data functions)
+let _v1PredsAll = [], _v1PredFilter = 'all', _v1ResultsData = [], _v1ChartBuilt = false;
+
+function initV1OverlayContent() {
+  loadV1HomeStats && loadV1HomeStats();
+  loadV1Predictions();
+  loadV1Results();
+  loadV1Statistics && loadV1Statistics();
+}
+
+async function loadV1HomeStats() {
+  const results = await getV1AllResults();
+  if (!results||!results.length) return;
+  const m = calcMetrics(results);
+  ['total','wr','rtp','net'].forEach(function(k) {
+    const el = document.getElementById("v1h-" + k);
+    if (!el) return;
+    if (k === 'total') el.textContent = m.total_bets;
+    else if (k === 'wr')  { el.textContent = m.win_rate + "%"; document.getElementById("v1h-wr-card").classList.add(parseFloat(m.win_rate)>=55?"positive":"negative"); }
+    else if (k === 'rtp') { el.textContent = m.rtp + "%"; document.getElementById("v1h-rtp-card").classList.add(parseFloat(m.rtp)>=100?"positive":"negative"); }
+    else if (k === 'net') { el.textContent = (parseFloat(m.net_units)>=0?"+":"") + m.net_units + "u"; document.getElementById("v1h-net-card").classList.add(parseFloat(m.net_units)>=0?"positive":"negative"); }
+  });
+}
+
+async function loadV1Predictions() {
+  const preds = await getV1Predictions();
+  const container = document.getElementById("v1-pred-container");
+  if (!preds||!preds.length) {
+    container.innerHTML = '<div class="no-event"><div class="no-event-icon">&#x1F94A;</div><div class="no-event-title">No V1 Predictions Posted</div></div>';
+    return;
+  }
+  _v1PredsAll = preds;
+  const matchups = new Set(preds.map(function(r){return [r.fighter||r.name,r.opponent].sort().join("__");}));
+  const bets = preds.filter(function(r){return parseFloat(r.bet_size||r.units||0)>0;});
+  const totalU = bets.reduce(function(s,r){return s+parseFloat(r.bet_size||r.units||0);},0);
+  const sf = document.getElementById("v1p-fights"); if (sf) sf.textContent = matchups.size;
+  const sb = document.getElementById("v1p-bets");   if (sb) sb.textContent = bets.length;
+  const su = document.getElementById("v1p-units");  if (su) su.textContent = totalU.toFixed(1) + "u";
+
+  // V1 parlay button
+  if (bets.length >= 2) {
+    const v1ParlayBar = document.getElementById("v1-parlay-bar");
+    const v1ParlayBtn = document.getElementById("v1-parlay-dk-btn");
+    if (v1ParlayBar && v1ParlayBtn) {
+      const parlayLink = gamblyUrl(bets.map(function(r){return (r.fighter||r.name||"")+" moneyline";}).join(" and "));
+      v1ParlayBtn.href = parlayLink;
+      v1ParlayBar.style.display = "";
+    }
+  }
+
+  renderV1Preds();
+}
+
+function renderV1Preds() {
+  const container = document.getElementById("v1-pred-container");
+  if (!container||!_v1PredsAll.length) return;
+  const matchupMap = new Map();
+  _v1PredsAll.forEach(function(r) {
+    const key = [r.fighter||r.name,r.opponent].sort().join("__");
+    if (!matchupMap.has(key)) matchupMap.set(key,[]);
+    matchupMap.get(key).push(r);
+  });
+  // Always bets only for V1
+  let fights = Array.from(matchupMap.values()).filter(function(p){
+    return p.length >= 2 && p.some(function(r){return parseFloat(r.bet_size||r.units||0)>0;});
+  });
+  if (!fights.length) { container.innerHTML='<div class="no-event"><div class="no-event-title">No bets this week</div></div>'; return; }
+  container.innerHTML = fights.map(function(pair) {
+    // Put bet fighter on the left
+    let fa=pair[0], fb=pair[1];
+    const betA0=parseFloat(fa.bet_size||fa.units||0)>0;
+    const betB0=parseFloat(fb.bet_size||fb.units||0)>0;
+    if (!betA0 && betB0) { const tmp=fa; fa=fb; fb=tmp; }
+    const betA=parseFloat(fa.bet_size||fa.units||0)>0;
+    const betB=parseFloat(fb.bet_size||fb.units||0)>0;
+
+    function v1Side(r, isBet) {
+      const name=r.fighter||r.name||"--";
+      const dkLink=r.dk_link||"";
+      const betSz=parseFloat(r.bet_size||r.units||0);
+      const style=r.style||r.career_style||"";
+      const styleEl=style?styleBadge(style,false):"";
+      let betBtn="";
+      if(isBet&&betSz>0){
+        const url=dkLink||gamblyUrl(name+" moneyline");
+        betBtn='<a href="'+url+'" target="_blank" rel="noopener" class="pred-bet-btn"><img src="assets/img/dk.png" alt="DraftKings" style="height:11px;opacity:0.85;vertical-align:middle;margin-right:5px;">Bet '+betSz.toFixed(1)+' on DraftKings</a>';
+      }
+      return '<div class="pred-side'+(isBet?' pred-side--bet':'')+'">'+
+        '<div class="pred-side-top"><div class="pred-fighter-name'+(isBet?' is-bet':'')+'">'+name+'</div>'+(styleEl?'<div class="pred-badges">'+styleEl+'</div>':'')+'</div>'+
+        probBar(parseFloat(r.predicted_probability||r.predicted_prob||r.win_prob||0))+
+        '<div class="pred-meta">'+oddsChip(r.Odds||r.odds_numeric)+'</div>'+
+        betBtn+
+      '</div>';
+    }
+    const wc=fa.weight_class||fb.weight_class||"";
+    return '<div class="pred-fight has-bet"><div class="pred-fight-header"><span class="pred-fight-wc">'+wc+'</span><span class="badge badge-market" style="background:rgba(184,146,74,0.12);border:1px solid rgba(184,146,74,0.3);color:#b8924a;">Recommended Bet</span></div><div class="pred-versus">'+v1Side(fa,betA)+'<div class="pred-vs-divider"><span class="pred-vs-text">VS</span></div>'+v1Side(fb,betB)+'</div></div>';
+  }).join("");
+}
+
+async function loadV1Results() {
+  const results = await getV1AllResults();
+  if (!results||!results.length) return;
+  const normResults = results.map(function(r){return Object.assign({},r,{bet_size:r.bet_size||r.units||"0"});});
+  const m = calcMetrics(normResults);
+  const bets = results.filter(function(r){return parseFloat(r.bet_size||r.units||0)>0;});
+  const el = function(id){return document.getElementById(id);};
+  if(el("v1r-bets")) el("v1r-bets").textContent=m.total_bets;
+  if(el("v1r-wl"))   el("v1r-wl").textContent=m.winning_bets+"W / "+m.losing_bets+"L";
+  if(el("v1r-wr"))   { el("v1r-wr").textContent=m.win_rate+"%"; }
+  if(el("v1r-rtp"))  { el("v1r-rtp").textContent=m.rtp+"%"; el("v1r-rtp-card")&&el("v1r-rtp-card").classList.add(parseFloat(m.rtp)>=96?"positive":"negative"); }
+  if(el("v1r-net"))  { el("v1r-net").textContent=(parseFloat(m.net_units)>=0?"+":"")+m.net_units+"u"; el("v1r-net-card")&&el("v1r-net-card").classList.add(parseFloat(m.net_units)>=0?"positive":"negative"); }
+  if(el("v1r-count")) el("v1r-count").textContent=bets.length+" bets";
+  if(el("v1r-tbody")) {
+    el("v1r-tbody").innerHTML = bets.length ? bets.map(function(r){
+      const won=r.won==="1"||r.won===1; const net=parseFloat(r.net||r.profit||0); const bs=parseFloat(r.bet_size||r.units||0);
+      return '<tr><td class="td-name" style="color:var(--text-secondary);">'+(r.name||r.fighter||"--")+'</td><td class="td-mono">'+(r.opponent||"--")+'</td><td>'+(won?'<span class="badge badge-won">W</span>':'<span class="badge badge-lost">L</span>')+'</td><td class="td-mono">'+fmtOdds(r.Odds||r.odds_numeric)+'</td><td class="td-mono" data-val="bet_size" data-raw="'+bs+'">'+fmtUnits(bs)+'</td><td class="'+pnlClass(net)+'" data-val="net" data-raw="'+net+'">'+fmtPnL(net)+'</td><td style="font-size:12px;color:var(--text-muted);">'+(r.event_name||r.event||"--")+'</td></tr>';
+    }).join("") : '<tr><td colspan="7" class="alert-empty">No V1 bets recorded</td></tr>';
+    makeSortable(el("v1r-table"));
+  }
+}
+
+async function loadV1Statistics() {
+  const stats = await getV1Stats();
+  const sl = document.getElementById("v1s-loading"), sc = document.getElementById("v1s-content");
+  if (sl) sl.style.display = "none";
+  if (!stats) { if(sc){sc.innerHTML='<div class="no-event"><div class="no-event-icon">📊</div><div class="no-event-title">No V1 Statistics Yet</div><div class="no-event-sub">Stats generated after results are recorded</div></div>';sc.style.display="block";} return; }
+  if (sc) sc.style.display = "block";
+  const perf=stats.overall_performance||{}, bs=stats.basic_statistics||{}, tt=stats.t_test||{}, bsd=stats.bet_size_distribution||{};
+  // Normalize monthly: v1_statistics.py uses n_bets/win_rate(0-1)/no rtp; buildFromCSV uses bets/win_rate(pct)/rtp
+  const rawMon=stats.monthly_performance||[];
+  const mon=rawMon.map(function(m){
+    var bc=m.bets||m.n_bets||0;
+    var wr=parseFloat(m.win_rate||0); if(wr<=1.0)wr=wr*100;
+    var st=parseFloat(m.units_staked||0); var net=parseFloat(m.net_units||0);
+    var rtp=m.rtp!==undefined?parseFloat(m.rtp):(st>0?(st+net)/st*100:0);
+    return{month:m.month,bets:bc,win_rate:wr,units_staked:st,net_units:net,rtp:rtp};
+  });
+  const el=function(id){return document.getElementById(id);};
+  if(perf.rtp_pct!==undefined&&el("v1s-rtp")){el("v1s-rtp").textContent=parseFloat(perf.rtp_pct).toFixed(1)+"%";el("v1s-rtp-card")&&el("v1s-rtp-card").classList.add(parseFloat(perf.rtp_pct)>=96?"positive":"negative");}
+  if(perf.win_rate_pct!==undefined&&el("v1s-wr")){el("v1s-wr").textContent=parseFloat(perf.win_rate_pct).toFixed(1)+"%";el("v1s-wr-sub")&&(el("v1s-wr-sub").textContent=(perf.total_wins||0)+"W / "+(perf.total_losses||0)+"L");}
+  if(perf.net_units!==undefined&&el("v1s-net")){const n=parseFloat(perf.net_units);el("v1s-net").textContent=(n>=0?"+":"")+n.toFixed(2);el("v1s-net-card")&&el("v1s-net-card").classList.add(n>=0?"positive":"negative");}
+  const meanU=bsd.mean_units||bsd.mean||null; if(meanU&&el("v1s-avgbet"))el("v1s-avgbet").textContent=parseFloat(meanU).toFixed(2);
+  if(tt.conclusion&&el("v1s-ttest-conclusion")){const pass=tt.conclusion==="Reject H0";el("v1s-ttest-conclusion").textContent=pass?"Edge Detected":"No Significant Edge";el("v1s-ttest-conclusion").className="ttest-result "+(pass?"pass":"fail");el("v1s-ttest-t")&&(el("v1s-ttest-t").textContent=fmt(tt.t_statistic,3));el("v1s-ttest-p")&&(el("v1s-ttest-p").textContent=fmt(tt.p_value_one_sided,4));el("v1s-ttest-sig")&&(el("v1s-ttest-sig").textContent=parseFloat(tt.p_value_one_sided)<0.05?"p < 0.05":"p >= 0.05");el("v1s-ttest-n")&&(el("v1s-ttest-n").textContent=bs.count||"--");}
+  if(mon.length&&el("v1s-monthly-tbody")) el("v1s-monthly-tbody").innerHTML=[...mon].reverse().map(function(m){const net=parseFloat(m.net_units||0);return '<tr><td class="td-mono">'+m.month+'</td><td class="td-mono">'+m.bets+'</td><td class="td-mono">'+fmt(m.win_rate,1)+'%</td><td class="td-mono">'+fmt(m.units_staked,2)+'u</td><td class="'+pnlClass(net)+'">'+fmtPnL(net)+'</td><td class="td-mono '+(parseFloat(m.rtp)>=96?'td-positive':'td-negative')+'">'+fmt(m.rtp,1)+'%</td></tr>';}).join("");
+  else if(el("v1s-monthly-tbody")) el("v1s-monthly-tbody").innerHTML='<tr><td colspan="6" class="alert-empty">No monthly data yet</td></tr>';
+  if(mon.length&&!_v1ChartBuilt&&el("v1s-chart-monthly")){
+    _v1ChartBuilt=true;
+    const isDark=document.documentElement.getAttribute("data-theme")!=="light";
+    const tc=isDark?"#3e3e54":"#9494ac", gc=isDark?"rgba(255,255,255,0.05)":"rgba(0,0,0,0.06)", font="'IBM Plex Mono',monospace";
+    new Chart(el("v1s-chart-monthly").getContext("2d"),{type:"bar",data:{labels:mon.map(function(m){return m.month;}),datasets:[{label:"Net Units",data:mon.map(function(m){return parseFloat(m.net_units||0);}),backgroundColor:mon.map(function(m){return parseFloat(m.net_units||0)>=0?"rgba(184,146,74,0.65)":"rgba(212,25,42,0.65)";}),borderRadius:2}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tc,font:{family:font,size:10}},grid:{color:gc}},y:{ticks:{color:tc,font:{family:font,size:10},callback:function(v){return(v>=0?"+":"")+v.toFixed(1)+"u";}},grid:{color:gc}}}}});
+  }
+}
+
+function showV1Panel(panel) {
+  document.querySelectorAll(".v1-panel").forEach(function(el){el.style.display=el.dataset.panel===panel?"":"none";});
+  document.querySelectorAll(".v1-subnav-tab,.v1-nav-link").forEach(function(btn){btn.classList.toggle("active",btn.dataset.panel===panel);});
+  const ov=document.getElementById("v1-overlay"); if(ov) ov.scrollTop=0;
+}
+</script>
+
+</body>
+</html>
