@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Results - OctaStats</title>
+  <meta name="description" content="OctaStats V2 model betting results: win rate, P&L, and historical performance." />
+  <meta name="theme-color" content="#09090c" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <script src="assets/js/main.js"></script>
+</head>
+<body>
+
+<nav class="nav" role="navigation">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-brand"><span class="nav-brand-dot"></span>OctaStats</a>
+    <div class="nav-links">
+      <a href="index.html"       class="nav-link">Home</a>
+      <a href="predictions.html" class="nav-link">Predictions</a>
+      <a href="results.html"     class="nav-link active">Results</a>
+      <a href="statistics.html"  class="nav-link">Statistics</a>
+    </div>
+    <div class="nav-v1-toggle" role="button" tabindex="0">
+      <span class="nav-v1-toggle-option opt-v2 active-opt">V2</span>
+      <span class="nav-v1-toggle-option opt-v1">V1</span>
+    </div>
+    <div class="theme-toggle-slider" role="button" tabindex="0">
+      <span class="theme-toggle-option opt-dark active-opt">&#9790;</span>
+      <span class="theme-toggle-option opt-light">&#9728;</span>
+    </div>
+    <button class="nav-hamburger" aria-label="Open menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="nav-mobile-menu">
+  <a href="index.html"       class="nav-link">Home</a>
+  <a href="predictions.html" class="nav-link">Predictions</a>
+  <a href="results.html"     class="nav-link active">Results</a>
+  <a href="statistics.html"  class="nav-link">Statistics</a>
+  <div class="nav-mobile-controls">
+    <span class="nav-mobile-label">Model</span>
+    <div class="nav-v1-toggle" style="cursor:pointer;">
+      <span class="nav-v1-toggle-option opt-v2 active-opt">V2</span>
+      <span class="nav-v1-toggle-option opt-v1">V1</span>
+    </div>
+    <span class="nav-mobile-label" style="margin-left:12px;">Theme</span>
+    <div class="theme-toggle-slider" style="cursor:pointer;">
+      <span class="theme-toggle-option opt-dark active-opt">&#9790;</span>
+      <span class="theme-toggle-option opt-light">&#9728;</span>
+    </div>
+  </div>
+</div>
+
+<main class="page">
+
+  <div class="page-header">
+    <div class="page-eyebrow">V2 Model</div>
+    <h1 class="page-title">Betting Results</h1>
+    <p class="page-subtitle">All-time record of model bet recommendations</p>
+  </div>
+
+  <div class="stat-grid stagger mb-24">
+    <div class="stat-card">
+      <div class="stat-label">Total Bets</div>
+      <div class="stat-value" id="res-bets">--</div>
+      <div class="stat-sub" id="res-wl">--</div>
+    </div>
+    <div class="stat-card winrate-card">
+      <div class="stat-label">Win Rate</div>
+      <div class="stat-value" id="res-wr">--</div>
+    </div>
+    <div class="stat-card" id="res-rtp-card">
+      <div class="stat-label">RTP</div>
+      <div class="stat-value" id="res-rtp">--</div>
+      <div class="stat-sub">96% = break-even</div>
+    </div>
+    <div class="stat-card" id="res-net-card">
+      <div class="stat-label">Net Units</div>
+      <div class="stat-value" id="res-net">--</div>
+    </div>
+  </div>
+
+  <!-- Default to Most Recent Event tab -->
+  <div class="tab-bar">
+    <div class="tab active" id="tab-recent" onclick="showTab('recent')">Most Recent Event</div>
+    <div class="tab"        id="tab-all"    onclick="showTab('all')">All Results</div>
+    <div class="tab"        id="tab-props"  onclick="showTab('props')">Prop Bets</div>
+  </div>
+
+  <div id="panel-recent">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title" id="recent-event-title">Most Recent Event</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Fighter</th>
+              <th>Opponent</th>
+              <th>Result</th>
+              <th>Odds</th>
+              <th>Bet</th>
+              <th>Model Prob</th>
+              <th>P&amp;L</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-recent"><tr><td colspan="7" class="alert-empty">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="panel-all" style="display:none;">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">All Bets</span>
+        <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);" id="all-count"></span>
+      </div>
+      <div class="table-wrap">
+        <table id="table-all">
+          <thead>
+            <tr>
+              <th data-sort="name">Fighter</th>
+              <th>Opponent</th>
+              <th>Result</th>
+              <th data-sort="Odds">Odds</th>
+              <th data-sort="bet_size">Bet</th>
+              <th data-sort="net">P&amp;L</th>
+              <th>Event</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-all"><tr><td colspan="7" class="alert-empty">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Prop bets results tab -->
+  <div id="panel-props" style="display:none;">
+    <div class="stat-grid stagger mb-20" style="grid-template-columns:repeat(auto-fit,minmax(110px,1fr));">
+      <div class="stat-card"><div class="stat-label">Prop Bets</div><div class="stat-value" id="prop-res-bets">--</div></div>
+      <div class="stat-card winrate-card"><div class="stat-label">Win Rate</div><div class="stat-value" id="prop-res-wr">--</div></div>
+      <div class="stat-card" id="prop-res-rtp-card"><div class="stat-label">RTP</div><div class="stat-value" id="prop-res-rtp">--</div></div>
+      <div class="stat-card" id="prop-res-net-card"><div class="stat-label">Net Units</div><div class="stat-value" id="prop-res-net">--</div></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">All Prop Bets</span>
+        <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);" id="prop-all-count"></span>
+      </div>
+      <div class="table-wrap">
+        <table id="table-props">
+          <thead>
+            <tr>
+              <th data-sort="prop_label">Prop</th>
+              <th>Matchup</th>
+              <th>Result</th>
+              <th data-sort="bet_size">Bet</th>
+              <th data-sort="net">P&amp;L</th>
+              <th>Event</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-props"><tr><td colspan="6" class="alert-empty">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <p>OctaStats &nbsp;&middot;&nbsp; Data: UFCStats.com &nbsp;&middot;&nbsp; Odds: BestFightOdds.com</p>
+  <p class="mt-4">
+    Made by Zach Winship &nbsp;&middot;&nbsp;
+    <a href="https://github.com/zwinship" target="_blank" rel="noopener">GitHub</a>
+    &nbsp;&middot;&nbsp;
+    <a href="https://zwinship.github.io/" target="_blank" rel="noopener">Portfolio</a>
+    &nbsp;&middot;&nbsp;
+    <a href="https://www.linkedin.com/in/zwinship/" target="_blank" rel="noopener">LinkedIn</a>
+  </p>
+</footer>
+
+<!-- V1 Overlay -->
+<div class="v1-overlay" id="v1-overlay" style="display:none;">
+
+  <!-- V1 Home -->
+  <div class="v1-page v1-panel" data-panel="home" style="display:none;">
+    <div class="v1-hero-section">
+      <div class="v1-heritage-badge"><span class="v1-heritage-dot"></span>Legacy Model · Superseded by V2</div>
+      <h1 class="v1-hero-title">OctaStats<br>V1 Model</h1>
+      <p style="color:var(--text-muted);max-width:480px;font-size:14px;line-height:1.65;margin-bottom:20px;position:relative;z-index:1;">The original OctaStats linear regression model with discrete 0-3 unit bet sizing. <strong style="color:var(--text-secondary);">V2 is the active model.</strong></p>
+      <div class="hero-actions">
+        <button class="btn btn-outline" onclick="showV1Panel('predictions')">V1 Predictions</button>
+        <button class="btn btn-outline" onclick="showV1Panel('results')">V1 Results</button>
+        <button class="btn btn-outline" onclick="showV1Panel('statistics')">V1 Statistics</button>
+        <button class="btn v1-close-btn" style="background:var(--red);color:#fff;">Back to V2</button>
+      </div>
+      <div class="v1-hero-bg" aria-hidden="true">V1</div>
+    </div>
+    <div class="stat-grid stagger mb-24">
+      <div class="stat-card"><div class="stat-label">Total Bets</div><div class="stat-value" id="v1h-total">--</div></div>
+      <div class="stat-card winrate-card"><div class="stat-label">Win Rate</div><div class="stat-value" id="v1h-wr">--</div></div>
+      <div class="stat-card" id="v1h-rtp-card"><div class="stat-label">RTP</div><div class="stat-value" id="v1h-rtp">--</div></div>
+      <div class="stat-card" id="v1h-net-card"><div class="stat-label">Net Units</div><div class="stat-value" id="v1h-net">--</div></div>
+    </div>
+    <div class="page-header"><div class="page-eyebrow">Comparison</div><h2 class="page-title" style="font-size:clamp(22px,4vw,34px)">V1 vs V2</h2></div>
+    <div class="card mb-24"><div class="table-wrap"><table class="diff-table">
+      <thead><tr><th>Feature</th><th>V1 (Legacy)</th><th>V2 (Current)</th></tr></thead>
+      <tbody>
+        <tr><td>Model type</td><td class="v1-col">Linear regression (OLS)</td><td class="v2-col">Dynamic logit (logistic regression)</td></tr>
+        <tr><td>Regularization</td><td class="v1-col">None</td><td class="v2-col">LASSO (L1), cross-validated</td></tr>
+        <tr><td>Bet sizing</td><td class="v1-col">Discrete 0/1/2/3 units</td><td class="v2-col">Continuous Kelly-bounded (1 to 5u)</td></tr>
+        <tr><td>Market odds</td><td class="v1-col">Basic input feature</td><td class="v2-col">Implied prob + model/market blend</td></tr>
+        <tr><td>Style prediction</td><td class="v1-col">Static career style label</td><td class="v2-col">Dynamic in-fight style prediction</td></tr>
+        <tr><td>Style interactions</td><td class="v1-col">Basic categories</td><td class="v2-col">6 styles x 36 matchup interactions</td></tr>
+        <tr><td>Finish prediction</td><td class="v1-col">Not available</td><td class="v2-col">Multinomial logit (KO / Sub / Dec)</td></tr>
+        <tr><td>Prop models</td><td class="v1-col">Not available</td><td class="v2-col">Goes distance / KO / Submission</td></tr>
+      </tbody>
+    </table></div></div>
+  </div>
+
+  <!-- V1 Predictions -->
+  <div class="v1-page v1-panel" data-panel="predictions" style="display:none;">
+    <div class="page-header"><div class="page-eyebrow">V1 Legacy Model</div><h1 class="page-title" style="color:var(--text-secondary);">V1 Fight Predictions</h1></div>
+    <div class="stat-grid stagger mb-20" style="grid-template-columns:repeat(auto-fit,minmax(110px,1fr));">
+      <div class="stat-card"><div class="stat-label">Fights</div><div class="stat-value" id="v1p-fights">--</div></div>
+      <div class="stat-card"><div class="stat-label">Bets</div><div class="stat-value" id="v1p-bets">--</div></div>
+      <div class="stat-card"><div class="stat-label">Total Units</div><div class="stat-value" id="v1p-units">--</div></div>
+    </div>
+    <div class="filter-bar">
+      <button class="btn btn-outline active" id="v1pf-all" onclick="v1PredFilter('all')">All Fights</button>
+      <button class="btn btn-outline" id="v1pf-bets" onclick="v1PredFilter('bets')">Bets Only</button>
+    </div>
+    <div id="v1-pred-container"><div class="loading"><div class="spinner"></div>Loading V1 predictions...</div></div>
+  </div>
+
+  <!-- V1 Results -->
+  <div class="v1-page v1-panel" data-panel="results">
+    <div class="page-header"><div class="page-eyebrow">V1 Legacy Model</div><h1 class="page-title" style="color:var(--text-secondary);">V1 Betting Results</h1></div>
+    <div class="stat-grid stagger mb-24">
+      <div class="stat-card"><div class="stat-label">Total Bets</div><div class="stat-value" id="v1r-bets">--</div><div class="stat-sub" id="v1r-wl">--</div></div>
+      <div class="stat-card winrate-card"><div class="stat-label">Win Rate</div><div class="stat-value" id="v1r-wr">--</div></div>
+      <div class="stat-card" id="v1r-rtp-card"><div class="stat-label">RTP</div><div class="stat-value" id="v1r-rtp">--</div></div>
+      <div class="stat-card" id="v1r-net-card"><div class="stat-label">Net Units</div><div class="stat-value" id="v1r-net">--</div></div>
+    </div>
+    <div class="tab-bar">
+      <div class="tab active" id="v1rt-recent" onclick="v1ResultsTab('recent')">Recent Event</div>
+      <div class="tab" id="v1rt-all" onclick="v1ResultsTab('all')">All Results</div>
+    </div>
+    <div id="v1r-panel-recent">
+      <div class="card">
+        <div class="card-header"><span class="card-title" id="v1r-recent-title">Recent Event</span></div>
+        <div class="table-wrap"><table><thead><tr><th>Fighter</th><th>Opponent</th><th>Result</th><th>Odds</th><th>Bet</th><th>Prob</th><th>P&amp;L</th></tr></thead><tbody id="v1r-tbody-recent"><tr><td colspan="7" class="alert-empty">Loading...</td></tr></tbody></table></div>
+      </div>
+    </div>
+    <div id="v1r-panel-all" style="display:none;">
+      <div class="card">
+        <div class="card-header"><span class="card-title">All V1 Bets</span><span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);" id="v1r-count"></span></div>
+        <div class="table-wrap"><table id="v1r-table"><thead><tr><th data-sort="name">Fighter</th><th>Opponent</th><th>Result</th><th data-sort="Odds">Odds</th><th data-sort="bet_size">Bet</th><th data-sort="net">P&amp;L</th><th>Event</th></tr></thead><tbody id="v1r-tbody"><tr><td colspan="7" class="alert-empty">Loading...</td></tr></tbody></table></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- V1 Statistics -->
+  <div class="v1-page v1-panel" data-panel="statistics" style="display:none;">
+    <div class="page-header"><div class="page-eyebrow">V1 Legacy Model</div><h1 class="page-title" style="color:var(--text-secondary);">V1 Statistical Analysis</h1><p class="page-subtitle">Legacy model performance</p></div>
+    <div id="v1s-loading" class="loading"><div class="spinner"></div>Loading V1 statistics...</div>
+    <div id="v1s-content" style="display:none;">
+      <div class="stat-grid stagger mb-24">
+        <div class="stat-card" id="v1s-rtp-card"><div class="stat-label">All-time RTP</div><div class="stat-value" id="v1s-rtp">--</div><div class="stat-sub">96% = break-even</div></div>
+        <div class="stat-card winrate-card"><div class="stat-label">Win Rate</div><div class="stat-value" id="v1s-wr">--</div><div class="stat-sub" id="v1s-wr-sub">--</div></div>
+        <div class="stat-card" id="v1s-net-card"><div class="stat-label">Net Units</div><div class="stat-value" id="v1s-net">--</div></div>
+        <div class="stat-card"><div class="stat-label">Avg Bet</div><div class="stat-value" id="v1s-avgbet">--</div><div class="stat-sub">units</div></div>
+      </div>
+      <div class="grid-2 mb-24">
+        <div class="card"><div class="card-header"><span class="card-title">Monthly P&amp;L</span></div><div class="card-body"><div class="chart-wrap"><canvas id="v1s-chart-monthly"></canvas></div></div></div>
+        <div class="ttest-box">
+          <div class="card-title" style="margin-bottom:12px;">Hypothesis Test</div>
+          <p style="font-family:var(--font-mono);font-size:11px;color:var(--text-secondary);margin-bottom:14px;line-height:1.6;">H0: Mean profit multiplier = 0.96 (break-even after vig)<br>H1: Mean profit multiplier &gt; 0.96 (model generates edge)</p>
+          <div class="ttest-result" id="v1s-ttest-conclusion">--</div>
+          <div class="ttest-row"><span class="ttest-row-label">T-statistic</span><span class="ttest-row-val" id="v1s-ttest-t">--</span></div>
+          <div class="ttest-row"><span class="ttest-row-label">p-value (one-sided)</span><span class="ttest-row-val" id="v1s-ttest-p">--</span></div>
+          <div class="ttest-row"><span class="ttest-row-label">Significance</span><span class="ttest-row-val" id="v1s-ttest-sig">--</span></div>
+          <div class="ttest-row"><span class="ttest-row-label">Sample size</span><span class="ttest-row-val" id="v1s-ttest-n">--</span></div>
+        </div>
+      </div>
+      <h2 class="section-title">Monthly Breakdown</h2>
+      <div class="card mb-24"><div class="table-wrap"><table><thead><tr><th>Month</th><th>Bets</th><th>Win Rate</th><th>Staked</th><th>Net Units</th><th>RTP</th></tr></thead><tbody id="v1s-monthly-tbody"><tr><td colspan="6" class="alert-empty">Loading...</td></tr></tbody></table></div></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+// ── V2 Results tab switch ──────────────────────────────────────────────────────
+var _activeTab = "recent";
+
+function showTab(tab) {
+  _activeTab = tab;
+  ["recent","all","props"].forEach(function(t) {
+    var tabEl   = document.getElementById("tab-" + t);
+    var panelEl = document.getElementById("panel-" + t);
+    if (tabEl)   tabEl.classList.toggle("active", t === tab);
+    if (panelEl) panelEl.style.display = t === tab ? "" : "none";
+  });
+}
+
+async function getV2AllPropResults() {
+  return await fetchCSV(DATA_BASE + "/results/v2_all_prop_results.csv");
+}
+
+(async function() {
+  var r3 = await Promise.all([getFightTitles(), getV2AllResults(), getV2AllPropResults()]);
+  var titles = r3[0], results = r3[1], propResults = r3[2];
+  var empty7 = '<tr><td colspan="7" class="alert-empty">No results recorded yet</td></tr>';
+  var empty6 = '<tr><td colspan="6" class="alert-empty">No prop results recorded yet</td></tr>';
+
+  // ── Moneyline results ───────────────────────────────────────────────────────
+  if (!results || !results.length) {
+    document.getElementById("tbody-all").innerHTML    = empty7;
+    document.getElementById("tbody-recent").innerHTML = empty7;
+  } else {
+    var bets = results.filter(function(r){ return parseFloat(r.bet_size) > 0; });
+    var m = calcMetrics(results);
+
+    document.getElementById("res-bets").textContent = m.total_bets;
+    document.getElementById("res-wl").textContent   = m.winning_bets + "W / " + m.losing_bets + "L";
+    document.getElementById("res-wr").textContent   = m.win_rate + "%";
+    document.getElementById("res-rtp").textContent  = m.rtp + "%";
+    document.getElementById("res-net").textContent  = (parseFloat(m.net_units) >= 0 ? "+" : "") + m.net_units + "u";
+    document.getElementById("res-rtp-card").classList.add(parseFloat(m.rtp) >= 96 ? "positive" : "negative");
+    document.getElementById("res-net-card").classList.add(parseFloat(m.net_units) >= 0 ? "positive" : "negative");
+
+    var betsReversed = bets.slice().reverse();
+    document.getElementById("tbody-all").innerHTML = betsReversed.length ? betsReversed.map(function(r) {
+      var won = r.won === "1" || r.won === 1;
+      var net = parseFloat(r.net || 0);
+      var bs  = parseFloat(r.bet_size || 0);
+      return '<tr><td class="td-name">' + (r.name||r.fighter||"--") + '</td><td class="td-mono" style="font-size:12px;">' + (r.opponent||"--") + '</td><td>' + (won ? '<span class="badge badge-won">W</span>' : '<span class="badge badge-lost">L</span>') + '</td><td class="td-mono">' + fmtOdds(r.Odds||r.odds_numeric) + '</td><td class="td-mono" data-val="bet_size" data-raw="' + bs + '">' + fmtUnits(bs) + '</td><td class="' + pnlClass(net) + '" data-val="net" data-raw="' + net + '">' + fmtPnL(net) + '</td><td style="font-size:12px;color:var(--text-secondary);">' + (r.event_name||"--") + '</td></tr>';
+    }).join("") : empty7;
+    document.getElementById("all-count").textContent = bets.length + " bets";
+    makeSortable(document.getElementById("table-all"));
+
+    var recentName = titles.recent || null;
+    if (recentName) {
+      document.getElementById("recent-event-title").textContent = recentName;
+      var recentRows = results.filter(function(r) {
+        return (r.event_name||"").toLowerCase().includes((recentName||"").toLowerCase()) && parseFloat(r.bet_size) > 0;
+      });
+      document.getElementById("tbody-recent").innerHTML = recentRows.length ? recentRows.map(function(r) {
+        var won  = r.won === "1" || r.won === 1;
+        var net  = parseFloat(r.net || 0);
+        var prob = parseFloat(r.predicted_probability || 0);
+        return '<tr><td class="td-name">' + (r.name||r.fighter||"--") + '</td><td class="td-mono">' + (r.opponent||"--") + '</td><td>' + (won ? '<span class="badge badge-won">W</span>' : '<span class="badge badge-lost">L</span>') + '</td><td class="td-mono">' + fmtOdds(r.Odds||r.odds_numeric) + '</td><td class="td-mono">' + fmtUnits(r.bet_size) + '</td><td>' + probBar(isNaN(prob)?0:prob) + '</td><td class="' + pnlClass(net) + '">' + fmtPnL(net) + '</td></tr>';
+      }).join("") : '<tr><td colspan="7" class="alert-empty">No bets for this event</td></tr>';
+    } else {
+      showTab("all");
+    }
+  }
+
+  // ── Prop results ────────────────────────────────────────────────────────────
+  if (propResults && propResults.length) {
+    var propBets = propResults.filter(function(p){ return parseFloat(p.bet_size||0) > 0 && p.won !== "" && p.won !== null && p.won !== undefined; });
+    var propWins  = propBets.filter(function(p){ return p.won === "1" || p.won === 1; });
+    var propStake = propBets.reduce(function(s,p){ return s + parseFloat(p.bet_size||0); }, 0);
+    var propRet   = propBets.reduce(function(s,p){ return s + parseFloat(p.total_return||0); }, 0);
+    var propNet   = propRet - propStake;
+    var propRTP   = propStake > 0 ? (propRet / propStake * 100) : 0;
+    var propWR    = propBets.length > 0 ? (propWins.length / propBets.length * 100) : 0;
+
+    document.getElementById("prop-res-bets").textContent = propBets.length;
+    document.getElementById("prop-res-wr").textContent   = propWR.toFixed(1) + "%";
+    document.getElementById("prop-res-rtp").textContent  = propRTP.toFixed(1) + "%";
+    document.getElementById("prop-res-net").textContent  = (propNet >= 0 ? "+" : "") + propNet.toFixed(2) + "u";
+    document.getElementById("prop-res-rtp-card").classList.add(propRTP >= 96 ? "positive" : "negative");
+    document.getElementById("prop-res-net-card").classList.add(propNet >= 0 ? "positive" : "negative");
+
+    var propBetsRev = propBets.slice().reverse();
+    document.getElementById("tbody-props").innerHTML = propBetsRev.length ? propBetsRev.map(function(p) {
+      var won = p.won === "1" || p.won === 1;
+      var net = parseFloat(p.net || 0);
+      var bs  = parseFloat(p.bet_size || 0);
+      return '<tr>' +
+        '<td class="td-name" style="max-width:180px;">' + (p.prop_label || p.prop_type || "--") + '</td>' +
+        '<td style="font-size:12px;color:var(--text-muted);">' + (p.matchup || (p.fighter_a + " vs " + p.fighter_b) || "--") + '</td>' +
+        '<td>' + (won ? '<span class="badge badge-won">W</span>' : '<span class="badge badge-lost">L</span>') + '</td>' +
+        '<td class="td-mono" data-val="bet_size" data-raw="' + bs + '">' + fmtUnits(bs) + '</td>' +
+        '<td class="' + pnlClass(net) + '" data-val="net" data-raw="' + net + '">' + fmtPnL(net) + '</td>' +
+        '<td style="font-size:12px;color:var(--text-secondary);">' + (p.event_name || "--") + '</td>' +
+      '</tr>';
+    }).join("") : empty6;
+    document.getElementById("prop-all-count").textContent = propBets.length + " bets";
+    makeSortable(document.getElementById("table-props"));
+  } else {
+    document.getElementById("tbody-props").innerHTML = empty6;
+  }
+})();
+
+// ── V1 Overlay ────────────────────────────────────────────────────────────────
+var _v1PredsAll = [], _v1PredFilter = "all", _v1ChartBuilt = false;
+var _v1ResultsActiveTab = "recent";
+
+function initV1OverlayContent() { loadV1HomeStats(); loadV1Predictions(); loadV1Results(); loadV1Statistics(); }
+
+async function loadV1HomeStats() {
+  var results = await getV1AllResults();
+  if(!results||!results.length) return;
+  var normR = results.map(function(r){ return Object.assign({},r,{bet_size:r.bet_size||r.units||"0"}); });
+  var m = calcMetrics(normR);
+  var el = function(id){ return document.getElementById(id); };
+  if(el("v1h-total")) el("v1h-total").textContent=m.total_bets;
+  if(el("v1h-wr")) el("v1h-wr").textContent=m.win_rate+"%";
+  if(el("v1h-rtp")){ el("v1h-rtp").textContent=m.rtp+"%"; el("v1h-rtp-card")&&el("v1h-rtp-card").classList.add(parseFloat(m.rtp)>=96?"positive":"negative"); }
+  if(el("v1h-net")){ el("v1h-net").textContent=(parseFloat(m.net_units)>=0?"+":"")+m.net_units+"u"; el("v1h-net-card")&&el("v1h-net-card").classList.add(parseFloat(m.net_units)>=0?"positive":"negative"); }
+}
+
+async function loadV1Predictions() {
+  var preds = await getV1Predictions();
+  var c = document.getElementById("v1-pred-container");
+  if(!preds||!preds.length){ if(c)c.innerHTML='<div class="no-event"><div class="no-event-title">No V1 Predictions Posted</div></div>'; return; }
+  _v1PredsAll=preds;
+  var matchups=new Set(preds.map(function(r){return [r.fighter||r.name,r.opponent].sort().join("__");}));
+  var bets=preds.filter(function(r){return parseFloat(r.bet_size||r.units||0)>0;});
+  var totalU=bets.reduce(function(s,r){return s+parseFloat(r.bet_size||r.units||0);},0);
+  var el=function(id){return document.getElementById(id);};
+  if(el("v1p-fights"))el("v1p-fights").textContent=matchups.size;
+  if(el("v1p-bets"))el("v1p-bets").textContent=bets.length;
+  if(el("v1p-units"))el("v1p-units").textContent=totalU.toFixed(1)+"u";
+  renderV1Preds();
+}
+function v1PredFilter(f){_v1PredFilter=f;var a=document.getElementById("v1pf-all"),b=document.getElementById("v1pf-bets");if(a)a.classList.toggle("active",f==="all");if(b)b.classList.toggle("active",f==="bets");renderV1Preds();}
+function renderV1Preds(){
+  var c=document.getElementById("v1-pred-container");if(!c||!_v1PredsAll.length)return;
+  var mm=new Map();_v1PredsAll.forEach(function(r){var k=[r.fighter||r.name,r.opponent].sort().join("__");if(!mm.has(k))mm.set(k,[]);mm.get(k).push(r);});
+  var fights=Array.from(mm.values());if(_v1PredFilter==="bets")fights=fights.filter(function(p){return p.some(function(r){return parseFloat(r.bet_size||r.units||0)>0;});});
+  if(!fights.length){c.innerHTML='<div class="no-event"><div class="no-event-title">No bets</div></div>';return;}
+  c.innerHTML=fights.map(function(pair){var fa=pair[0],fb=pair[1]||{name:fa.opponent};var hb=pair.some(function(r){return parseFloat(r.bet_size||r.units||0)>0;});
+  return'<div class="pred-fight'+(hb?" has-bet":"")+'"><div class="pred-fight-header"><span class="pred-fight-wc">'+(fa.weight_class||"")+'</span>'+(hb?'<span class="badge badge-market">Bet</span>':"")+'</div><div class="pred-versus"><div class="pred-fighter"><div class="pred-fighter-name">'+(fa.fighter||fa.name||"--")+'</div>'+probBar(parseFloat(fa.predicted_probability||fa.predicted_prob||fa.win_prob||0))+oddsChip(fa.Odds||fa.odds_numeric)+'</div><div class="pred-vs-center"><span class="pred-vs-text">VS</span></div><div class="pred-fighter right"><div class="pred-fighter-name">'+(fb.fighter||fb.name||fa.opponent||"--")+'</div>'+probBar(parseFloat(fb.predicted_probability||fb.predicted_prob||fb.win_prob||0))+oddsChip(fb.Odds||fb.odds_numeric)+'</div></div></div>';}).join("");
+}
+async function loadV1Results(){
+  var r2=await Promise.all([getV1Titles(),getV1AllResults()]);var titles=r2[0],results=r2[1];
+  if(!results||!results.length)return;
+  var normR=results.map(function(r){return Object.assign({},r,{bet_size:r.bet_size||r.units||"0"});});
+  var m=calcMetrics(normR);var bets=results.filter(function(r){return parseFloat(r.bet_size||r.units||0)>0;});
+  var betsRev=bets.slice().reverse();
+  var el=function(id){return document.getElementById(id);};
+  if(el("v1r-bets"))el("v1r-bets").textContent=m.total_bets;
+  if(el("v1r-wl"))el("v1r-wl").textContent=m.winning_bets+"W / "+m.losing_bets+"L";
+  if(el("v1r-wr"))el("v1r-wr").textContent=m.win_rate+"%";
+  if(el("v1r-rtp")){el("v1r-rtp").textContent=m.rtp+"%";el("v1r-rtp-card")&&el("v1r-rtp-card").classList.add(parseFloat(m.rtp)>=96?"positive":"negative");}
+  if(el("v1r-net")){el("v1r-net").textContent=(parseFloat(m.net_units)>=0?"+":"")+m.net_units+"u";el("v1r-net-card")&&el("v1r-net-card").classList.add(parseFloat(m.net_units)>=0?"positive":"negative");}
+  if(el("v1r-count"))el("v1r-count").textContent=bets.length+" bets";
+  if(el("v1r-tbody"))el("v1r-tbody").innerHTML=betsRev.length?betsRev.map(function(r){var won=r.won==="1"||r.won===1;var net=parseFloat(r.net||r.profit||0);var bs=parseFloat(r.bet_size||r.units||0);return'<tr><td class="td-name">'+(r.name||r.fighter||"--")+'</td><td class="td-mono">'+(r.opponent||"--")+'</td><td>'+(won?'<span class="badge badge-won">W</span>':'<span class="badge badge-lost">L</span>')+'</td><td class="td-mono">'+fmtOdds(r.Odds||r.odds_numeric)+'</td><td class="td-mono" data-val="bet_size" data-raw="'+bs+'">'+fmtUnits(bs)+'</td><td class="'+pnlClass(net)+'" data-val="net" data-raw="'+net+'">'+fmtPnL(net)+'</td><td style="font-size:12px;color:var(--text-muted);">'+(r.event_name||r.event||"--")+'</td></tr>';}).join(""):'<tr><td colspan="7" class="alert-empty">No V1 bets recorded</td></tr>';
+  makeSortable(el("v1r-table"));
+  var recentName=titles.recent||null;
+  if(recentName&&el("v1r-recent-title")){el("v1r-recent-title").textContent=recentName;var rr=results.filter(function(r){return(r.event_name||r.event||"").toLowerCase().includes((recentName||"").toLowerCase())&&parseFloat(r.bet_size||r.units||0)>0;});if(el("v1r-tbody-recent"))el("v1r-tbody-recent").innerHTML=rr.length?rr.map(function(r){var won=r.won==="1"||r.won===1;var net=parseFloat(r.net||r.profit||0);var bs=parseFloat(r.bet_size||r.units||0);var prob=parseFloat(r.predicted_probability||r.predicted_prob||r.win_prob||0);return'<tr><td class="td-name">'+(r.name||r.fighter||"--")+'</td><td class="td-mono">'+(r.opponent||"--")+'</td><td>'+(won?'<span class="badge badge-won">W</span>':'<span class="badge badge-lost">L</span>')+'</td><td class="td-mono">'+fmtOdds(r.Odds||r.odds_numeric)+'</td><td class="td-mono">'+fmtUnits(bs)+'</td><td>'+probBar(isNaN(prob)?0:prob)+'</td><td class="'+pnlClass(net)+'">'+fmtPnL(net)+'</td></tr>';}).join(""):'<tr><td colspan="7" class="alert-empty">No V1 bets for this event</td></tr>';}}
+
+function v1ResultsTab(tab){
+  _v1ResultsActiveTab=tab;
+  document.getElementById("v1rt-all").classList.toggle("active",tab==="all");
+  document.getElementById("v1rt-recent").classList.toggle("active",tab==="recent");
+  document.getElementById("v1r-panel-all").style.display=tab==="all"?"":"none";
+  document.getElementById("v1r-panel-recent").style.display=tab==="recent"?"":"none";
+}
+
+async function loadV1Statistics(){
+  var stats=await getV1Stats();var sl=document.getElementById("v1s-loading"),sc=document.getElementById("v1s-content");
+  if(sl)sl.style.display="none";
+  if(!stats){if(sc){sc.innerHTML='<div class="no-event"><div class="no-event-icon">📊</div><div class="no-event-title">No V1 Statistics Yet</div><div class="no-event-sub">Stats generated after results are recorded</div></div>';sc.style.display="block";}return;}
+  if(sc)sc.style.display="block";
+  var perf=stats.overall_performance||{},bs=stats.basic_statistics||{},tt=stats.t_test||{},bsd=stats.bet_size_distribution||{};
+  // Normalize monthly: v1_statistics.py uses n_bets/win_rate(0-1)/no rtp; buildFromCSV uses bets/win_rate(pct)/rtp
+  var rawMon=stats.monthly_performance||[];
+  var mon=rawMon.map(function(m){
+    var bc=m.bets||m.n_bets||0;
+    var wr=parseFloat(m.win_rate||0); if(wr<=1.0)wr=wr*100;
+    var st=parseFloat(m.units_staked||0);var net=parseFloat(m.net_units||0);
+    var rtp=m.rtp!==undefined?parseFloat(m.rtp):(st>0?(st+net)/st*100:0);
+    return{month:m.month,bets:bc,win_rate:wr,units_staked:st,net_units:net,rtp:rtp};
+  });
+  var el=function(id){return document.getElementById(id);};
+  if(perf.rtp_pct!==undefined&&el("v1s-rtp")){el("v1s-rtp").textContent=parseFloat(perf.rtp_pct).toFixed(1)+"%";el("v1s-rtp-card")&&el("v1s-rtp-card").classList.add(parseFloat(perf.rtp_pct)>=96?"positive":"negative");}
+  if(perf.win_rate_pct!==undefined&&el("v1s-wr")){el("v1s-wr").textContent=parseFloat(perf.win_rate_pct).toFixed(1)+"%";el("v1s-wr-sub")&&(el("v1s-wr-sub").textContent=(perf.total_wins||0)+"W / "+(perf.total_losses||0)+"L");}
+  if(perf.net_units!==undefined&&el("v1s-net")){var n2=parseFloat(perf.net_units);el("v1s-net").textContent=(n2>=0?"+":"")+n2.toFixed(2);el("v1s-net-card")&&el("v1s-net-card").classList.add(n2>=0?"positive":"negative");}
+  var meanU=bsd.mean_units||bsd.mean||null; if(meanU&&el("v1s-avgbet"))el("v1s-avgbet").textContent=parseFloat(meanU).toFixed(2);
+  if(tt.conclusion&&el("v1s-ttest-conclusion")){var pass=tt.conclusion==="Reject H0";el("v1s-ttest-conclusion").textContent=pass?"Edge Detected":"No Significant Edge";el("v1s-ttest-conclusion").className="ttest-result "+(pass?"pass":"fail");el("v1s-ttest-t")&&(el("v1s-ttest-t").textContent=fmt(tt.t_statistic,3));el("v1s-ttest-p")&&(el("v1s-ttest-p").textContent=fmt(tt.p_value_one_sided,4));el("v1s-ttest-sig")&&(el("v1s-ttest-sig").textContent=parseFloat(tt.p_value_one_sided)<0.05?"p < 0.05":"p >= 0.05");el("v1s-ttest-n")&&(el("v1s-ttest-n").textContent=bs.count||"--");}
+  if(mon.length&&el("v1s-monthly-tbody"))el("v1s-monthly-tbody").innerHTML=mon.slice().reverse().map(function(m){var n=parseFloat(m.net_units||0);return'<tr><td class="td-mono">'+m.month+'</td><td class="td-mono">'+m.bets+'</td><td class="td-mono">'+fmt(m.win_rate,1)+'%</td><td class="td-mono">'+fmt(m.units_staked,2)+'u</td><td class="'+pnlClass(n)+'">'+fmtPnL(n)+'</td><td class="td-mono '+(parseFloat(m.rtp)>=96?'td-positive':'td-negative')+'">'+fmt(m.rtp,1)+'%</td></tr>';}).join("");
+  else if(el("v1s-monthly-tbody"))el("v1s-monthly-tbody").innerHTML='<tr><td colspan="6" class="alert-empty">No monthly data yet</td></tr>';
+  if(mon.length&&!_v1ChartBuilt&&el("v1s-chart-monthly")){_v1ChartBuilt=true;var cd=chartDefaults();new Chart(el("v1s-chart-monthly").getContext("2d"),{type:"bar",data:{labels:mon.map(function(m){return m.month;}),datasets:[{label:"Net Units",data:mon.map(function(m){return parseFloat(m.net_units||0);}),backgroundColor:mon.map(function(m){return parseFloat(m.net_units||0)>=0?"rgba(184,146,74,0.65)":"rgba(212,25,42,0.65)";}),borderRadius:2}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:cd.textColor,font:{family:cd.font,size:10}},grid:{color:cd.gridColor}},y:{ticks:{color:cd.textColor,font:{family:cd.font,size:10},callback:function(v){return(v>=0?"+":"")+v.toFixed(1)+"u";}},grid:{color:cd.gridColor}}}}});}
+}
+
+function showV1Panel(panel){document.querySelectorAll(".v1-panel").forEach(function(el){el.style.display=el.dataset.panel===panel?"":"none";});document.querySelectorAll(".v1-subnav-tab,.v1-nav-link").forEach(function(btn){btn.classList.toggle("active",btn.dataset.panel===panel);});var ov=document.getElementById("v1-overlay");if(ov)ov.scrollTop=0;}
+</script>
+
+</body>
+</html>
