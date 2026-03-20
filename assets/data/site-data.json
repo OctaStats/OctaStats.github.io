@@ -1,9 +1,9 @@
 {
   "v2": {
-    "upcoming_event": "UFC Fight Night: Emmett vs. Vallejos",
-    "upcoming_date": "2026-03-14",
+    "upcoming_event": "UFC Fight Night: Evloev vs. Murphy",
+    "upcoming_date": "2026-03-21",
     "recent_event": "UFC Fight Night: Emmett vs. Vallejos",
-    "recent_date": "2026-03-14",
+    "recent_date": "",
     "data_base_url": "https://raw.githubusercontent.com/zwinship/OctaStats_UFC_Model_V2/main",
     "stats": {
       "analysis_date": "2026-03-15T22:47:30.584329",
@@ -165,5 +165,5 @@
       }
     }
   },
-  "last_updated": "2026-03-15T22:47:28.684002"
+  "last_updated": "2026-03-20T17:36:11.231219"
 }
