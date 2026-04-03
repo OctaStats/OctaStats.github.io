@@ -1,9 +1,9 @@
 {
   "v2": {
-    "upcoming_event": "UFC Fight Night: Adesanya vs. Pyfer",
-    "upcoming_date": "2026-03-28",
+    "upcoming_event": "UFC Fight Night: Moicano vs. Duncan",
+    "upcoming_date": "2026-04-04",
     "recent_event": "UFC Fight Night: Adesanya vs. Pyfer",
-    "recent_date": "2026-03-28",
+    "recent_date": "",
     "data_base_url": "https://raw.githubusercontent.com/zwinship/OctaStats_UFC_Model_V2/main",
     "stats": {
       "analysis_date": "2026-03-29T12:44:36.722490",
@@ -248,5 +248,5 @@
       }
     }
   },
-  "last_updated": "2026-03-29T12:44:34.653551"
+  "last_updated": "2026-04-03T17:35:04.569057"
 }
