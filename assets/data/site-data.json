@@ -1,9 +1,9 @@
 {
   "v2": {
-    "upcoming_event": "UFC 327: Prochazka vs. Ulberg",
-    "upcoming_date": "2026-04-11",
+    "upcoming_event": "UFC Fight Night: Burns vs. Malott",
+    "upcoming_date": "2026-04-18",
     "recent_event": "UFC 327: Prochazka vs. Ulberg",
-    "recent_date": "2026-04-11",
+    "recent_date": "",
     "data_base_url": "https://raw.githubusercontent.com/zwinship/OctaStats_UFC_Model_V2/main",
     "stats": {
       "analysis_date": "2026-04-12T12:53:29.503575",
@@ -272,5 +272,5 @@
       }
     }
   },
-  "last_updated": "2026-04-12T12:53:27.172908"
+  "last_updated": "2026-04-17T17:49:30.787594"
 }
