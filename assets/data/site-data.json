@@ -1,9 +1,9 @@
 {
   "v2": {
-    "upcoming_event": "UFC Fight Night: Burns vs. Malott",
-    "upcoming_date": "2026-04-18",
+    "upcoming_event": "UFC Fight Night: Sterling vs. Zalal",
+    "upcoming_date": "2026-04-25",
     "recent_event": "UFC Fight Night: Burns vs. Malott",
-    "recent_date": "2026-04-18",
+    "recent_date": "",
     "data_base_url": "https://raw.githubusercontent.com/zwinship/OctaStats_UFC_Model_V2/main",
     "stats": {
       "analysis_date": "2026-04-19T12:53:25.982877",
@@ -272,5 +272,5 @@
       }
     }
   },
-  "last_updated": "2026-04-19T12:53:23.927318"
+  "last_updated": "2026-04-24T17:51:18.754046"
 }
