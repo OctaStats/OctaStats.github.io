@@ -1,9 +1,9 @@
 {
   "v2": {
-    "upcoming_event": "UFC Fight Night: Sterling vs. Zalal",
-    "upcoming_date": "2026-04-25",
+    "upcoming_event": "UFC Fight Night: Della Maddalena vs. Prates",
+    "upcoming_date": "2026-05-02",
     "recent_event": "UFC Fight Night: Sterling vs. Zalal",
-    "recent_date": "2026-04-25",
+    "recent_date": "",
     "data_base_url": "https://raw.githubusercontent.com/zwinship/OctaStats_UFC_Model_V2/main",
     "stats": {
       "analysis_date": "2026-04-26T12:57:28.252537",
@@ -272,5 +272,5 @@
       }
     }
   },
-  "last_updated": "2026-04-26T12:57:25.922975"
+  "last_updated": "2026-05-01T17:59:23.297318"
 }
