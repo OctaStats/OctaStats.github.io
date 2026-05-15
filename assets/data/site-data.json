@@ -1,9 +1,9 @@
 {
   "v2": {
-    "upcoming_event": "UFC 328: Chimaev vs. Strickland",
-    "upcoming_date": "2026-05-09",
+    "upcoming_event": "UFC Fight Night: Allen vs. Costa",
+    "upcoming_date": "2026-05-16",
     "recent_event": "UFC 328: Chimaev vs. Strickland",
-    "recent_date": "2026-05-09",
+    "recent_date": "",
     "data_base_url": "https://raw.githubusercontent.com/zwinship/OctaStats_UFC_Model_V2/main",
     "stats": {
       "analysis_date": "2026-05-10T13:08:15.437024",
@@ -302,5 +302,5 @@
       }
     }
   },
-  "last_updated": "2026-05-10T13:08:12.832905"
+  "last_updated": "2026-05-15T18:23:16.370862"
 }
