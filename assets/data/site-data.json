@@ -1,9 +1,9 @@
 {
   "v2": {
-    "upcoming_event": "UFC Fight Night: Allen vs. Costa",
-    "upcoming_date": "2026-05-16",
+    "upcoming_event": "UFC Fight Night: Song vs. Figueiredo",
+    "upcoming_date": "2026-05-30",
     "recent_event": "UFC Fight Night: Allen vs. Costa",
-    "recent_date": "2026-05-16",
+    "recent_date": "",
     "data_base_url": "https://raw.githubusercontent.com/zwinship/OctaStats_UFC_Model_V2/main",
     "stats": {
       "analysis_date": "2026-05-24T13:15:23.019215",
@@ -302,5 +302,5 @@
       }
     }
   },
-  "last_updated": "2026-05-17T13:09:43.691271"
+  "last_updated": "2026-05-30T00:35:38.826761"
 }
