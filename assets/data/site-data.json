@@ -1,9 +1,9 @@
 {
   "v2": {
-    "upcoming_event": "UFC Fight Night: Song vs. Figueiredo",
-    "upcoming_date": "2026-05-30",
+    "upcoming_event": "UFC Fight Night: Muhammad vs. Bonfim",
+    "upcoming_date": "2026-06-06",
     "recent_event": "UFC Fight Night: Song vs. Figueiredo",
-    "recent_date": "2026-05-30",
+    "recent_date": "",
     "data_base_url": "https://raw.githubusercontent.com/zwinship/OctaStats_UFC_Model_V2/main",
     "stats": {
       "analysis_date": "2026-06-02T18:36:39.448442",
@@ -312,5 +312,5 @@
       }
     }
   },
-  "last_updated": "2026-06-02T18:36:37.106449"
+  "last_updated": "2026-06-05T18:58:14.943813"
 }
