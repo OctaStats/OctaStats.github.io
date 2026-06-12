@@ -1,9 +1,9 @@
 {
   "v2": {
-    "upcoming_event": "UFC Fight Night: Muhammad vs. Bonfim",
-    "upcoming_date": "2026-06-06",
+    "upcoming_event": "UFC Freedom 250",
+    "upcoming_date": "2026-06-14",
     "recent_event": "UFC Fight Night: Muhammad vs. Bonfim",
-    "recent_date": "2026-06-06",
+    "recent_date": "",
     "data_base_url": "https://raw.githubusercontent.com/zwinship/OctaStats_UFC_Model_V2/main",
     "stats": {
       "analysis_date": "2026-06-07T13:43:37.376139",
@@ -320,5 +320,5 @@
       }
     }
   },
-  "last_updated": "2026-06-07T13:43:35.109942"
+  "last_updated": "2026-06-12T19:04:36.255661"
 }
