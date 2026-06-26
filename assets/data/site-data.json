@@ -1,9 +1,9 @@
 {
   "v2": {
-    "upcoming_event": "UFC Fight Night: Kape vs. Horiguchi",
-    "upcoming_date": "2026-06-20",
+    "upcoming_event": "UFC Fight Night: Fiziev vs. Torres",
+    "upcoming_date": "2026-06-27",
     "recent_event": "UFC Fight Night: Kape vs. Horiguchi",
-    "recent_date": "2026-06-20",
+    "recent_date": "",
     "data_base_url": "https://raw.githubusercontent.com/zwinship/OctaStats_UFC_Model_V2/main",
     "stats": {
       "analysis_date": "2026-06-21T14:11:58.392933",
@@ -320,5 +320,5 @@
       }
     }
   },
-  "last_updated": "2026-06-21T14:11:55.547851"
+  "last_updated": "2026-06-26T18:51:47.024728"
 }
