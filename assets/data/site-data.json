@@ -1,9 +1,9 @@
 {
   "v2": {
-    "upcoming_event": "UFC Fight Night: Du Plessis vs. Usman",
-    "upcoming_date": "2026-07-18",
+    "upcoming_event": "UFC Fight Night: Ankalaev vs. Guskov",
+    "upcoming_date": "2026-07-25",
     "recent_event": "UFC Fight Night: Du Plessis vs. Usman",
-    "recent_date": "2026-07-18",
+    "recent_date": "",
     "data_base_url": "https://raw.githubusercontent.com/zwinship/OctaStats_UFC_Model_V2/main",
     "stats": {
       "analysis_date": "2026-07-19T13:17:47.497433",
@@ -330,5 +330,5 @@
       }
     }
   },
-  "last_updated": "2026-07-19T13:17:45.264403"
+  "last_updated": "2026-07-24T18:16:31.391196"
 }
