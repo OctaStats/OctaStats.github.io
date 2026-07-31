@@ -1,9 +1,9 @@
 {
   "v2": {
-    "upcoming_event": "UFC Fight Night: Ankalaev vs. Guskov",
-    "upcoming_date": "2026-07-25",
+    "upcoming_event": "UFC Fight Night: Medic vs. Rodriguez",
+    "upcoming_date": "2026-08-01",
     "recent_event": "UFC Fight Night: Ankalaev vs. Guskov",
-    "recent_date": "2026-07-25",
+    "recent_date": "",
     "data_base_url": "https://raw.githubusercontent.com/zwinship/OctaStats_UFC_Model_V2/main",
     "stats": {
       "analysis_date": "2026-07-26T13:21:25.817620",
@@ -330,5 +330,5 @@
       }
     }
   },
-  "last_updated": "2026-07-26T13:21:23.698601"
+  "last_updated": "2026-07-31T18:19:25.952110"
 }
