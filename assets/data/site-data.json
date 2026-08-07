@@ -1,9 +1,9 @@
 {
   "v2": {
-    "upcoming_event": "UFC Fight Night: Medic vs. Rodriguez",
-    "upcoming_date": "2026-08-01",
+    "upcoming_event": "UFC Fight Night: Gamrot vs. Salkilld",
+    "upcoming_date": "2026-08-08",
     "recent_event": "UFC Fight Night: Medic vs. Rodriguez",
-    "recent_date": "2026-08-01",
+    "recent_date": "",
     "data_base_url": "https://raw.githubusercontent.com/zwinship/OctaStats_UFC_Model_V2/main",
     "stats": {
       "analysis_date": "2026-08-02T13:20:19.042768",
@@ -340,5 +340,5 @@
       }
     }
   },
-  "last_updated": "2026-08-02T13:20:16.996491"
+  "last_updated": "2026-08-07T17:47:50.140710"
 }
