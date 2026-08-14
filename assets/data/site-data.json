@@ -1,9 +1,9 @@
 {
   "v2": {
-    "upcoming_event": "UFC Fight Night: Gamrot vs. Salkilld",
-    "upcoming_date": "2026-08-08",
+    "upcoming_event": "UFC 330: Makhachev vs. Machado Garry",
+    "upcoming_date": "2026-08-15",
     "recent_event": "UFC Fight Night: Gamrot vs. Salkilld",
-    "recent_date": "2026-08-08",
+    "recent_date": "",
     "data_base_url": "https://raw.githubusercontent.com/zwinship/OctaStats_UFC_Model_V2/main",
     "stats": {
       "analysis_date": "2026-08-09T12:50:00.833927",
@@ -340,5 +340,5 @@
       }
     }
   },
-  "last_updated": "2026-08-09T12:49:58.512229"
+  "last_updated": "2026-08-14T17:51:05.151457"
 }
