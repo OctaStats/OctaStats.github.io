@@ -1,9 +1,9 @@
 {
   "v2": {
-    "upcoming_event": "UFC 330: Makhachev vs. Machado Garry",
-    "upcoming_date": "2026-08-15",
+    "upcoming_event": "UFC Fight Night: Hernandez vs. Rodrigues",
+    "upcoming_date": "2026-08-22",
     "recent_event": "UFC 330: Makhachev vs. Machado Garry",
-    "recent_date": "2026-08-15",
+    "recent_date": "",
     "data_base_url": "https://raw.githubusercontent.com/zwinship/OctaStats_UFC_Model_V2/main",
     "stats": {
       "analysis_date": "2026-08-16T12:38:03.162060",
@@ -340,5 +340,5 @@
       }
     }
   },
-  "last_updated": "2026-08-16T12:38:00.342232"
+  "last_updated": "2026-08-21T17:26:17.599644"
 }
