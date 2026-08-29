@@ -1,9 +1,9 @@
 {
   "v2": {
-    "upcoming_event": "UFC Fight Night: Hernandez vs. Rodrigues",
-    "upcoming_date": "2026-08-22",
+    "upcoming_event": "UFC Fight Night: Nurmagomedov vs. Song",
+    "upcoming_date": "2026-08-29",
     "recent_event": "UFC Fight Night: Hernandez vs. Rodrigues",
-    "recent_date": "2026-08-22",
+    "recent_date": "",
     "data_base_url": "https://raw.githubusercontent.com/zwinship/OctaStats_UFC_Model_V2/main",
     "stats": {
       "analysis_date": "2026-08-23T12:38:48.319158",
@@ -340,5 +340,5 @@
       }
     }
   },
-  "last_updated": "2026-08-23T12:38:45.753671"
+  "last_updated": "2026-08-29T00:51:52.789029"
 }
