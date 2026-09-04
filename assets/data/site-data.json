@@ -1,9 +1,9 @@
 {
   "v2": {
-    "upcoming_event": "UFC Fight Night: Nurmagomedov vs. Song",
-    "upcoming_date": "2026-08-29",
+    "upcoming_event": "UFC Fight Night: Hooker vs. Parnasse",
+    "upcoming_date": "2026-09-05",
     "recent_event": "UFC Fight Night: Nurmagomedov vs. Song",
-    "recent_date": "2026-08-29",
+    "recent_date": "",
     "data_base_url": "https://raw.githubusercontent.com/zwinship/OctaStats_UFC_Model_V2/main",
     "stats": {
       "analysis_date": "2026-08-30T16:08:57.786206",
@@ -340,5 +340,5 @@
       }
     }
   },
-  "last_updated": "2026-08-30T16:08:55.313158"
+  "last_updated": "2026-09-04T19:17:31.794957"
 }
