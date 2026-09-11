@@ -1,9 +1,9 @@
 {
   "v2": {
-    "upcoming_event": "UFC Fight Night: Hooker vs. Parnasse",
-    "upcoming_date": "2026-09-05",
+    "upcoming_event": "Noche UFC: Silva vs. Delgado",
+    "upcoming_date": "2026-09-12",
     "recent_event": "UFC Fight Night: Hooker vs. Parnasse",
-    "recent_date": "2026-09-05",
+    "recent_date": "",
     "data_base_url": "https://raw.githubusercontent.com/zwinship/OctaStats_UFC_Model_V2/main",
     "stats": {
       "analysis_date": "2026-09-06T15:00:22.066909",
@@ -350,5 +350,5 @@
       }
     }
   },
-  "last_updated": "2026-09-06T15:00:19.786202"
+  "last_updated": "2026-09-11T19:28:06.147813"
 }
