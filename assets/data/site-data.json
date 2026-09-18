@@ -1,9 +1,9 @@
 {
   "v2": {
-    "upcoming_event": "Noche UFC: Silva vs. Delgado",
-    "upcoming_date": "2026-09-12",
+    "upcoming_event": "UFC 331: Van vs. Pantoja 2",
+    "upcoming_date": "2026-09-19",
     "recent_event": "Noche UFC: Silva vs. Delgado",
-    "recent_date": "2026-09-12",
+    "recent_date": "",
     "data_base_url": "https://raw.githubusercontent.com/zwinship/OctaStats_UFC_Model_V2/main",
     "stats": {
       "analysis_date": "2026-09-13T15:42:22.581374",
@@ -350,5 +350,5 @@
       }
     }
   },
-  "last_updated": "2026-09-13T15:42:20.368955"
+  "last_updated": "2026-09-18T19:26:22.065108"
 }
