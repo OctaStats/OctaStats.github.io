@@ -1,9 +1,9 @@
 {
   "v2": {
-    "upcoming_event": "UFC 331: Van vs. Pantoja 2",
-    "upcoming_date": "2026-09-19",
+    "upcoming_event": "UFC Fight Night: Rosas Jr. vs. Barcelos",
+    "upcoming_date": "2026-09-26",
     "recent_event": "UFC 331: Van vs. Pantoja 2",
-    "recent_date": "2026-09-19",
+    "recent_date": "",
     "data_base_url": "https://raw.githubusercontent.com/zwinship/OctaStats_UFC_Model_V2/main",
     "stats": {
       "analysis_date": "2026-09-20T15:32:15.807628",
@@ -350,5 +350,5 @@
       }
     }
   },
-  "last_updated": "2026-09-20T15:32:13.465892"
+  "last_updated": "2026-09-25T20:15:14.732366"
 }
