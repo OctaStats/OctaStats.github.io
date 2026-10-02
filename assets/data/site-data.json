@@ -1,9 +1,9 @@
 {
   "v2": {
-    "upcoming_event": "UFC Fight Night: Rosas Jr. vs. Barcelos",
-    "upcoming_date": "2026-09-26",
+    "upcoming_event": "UFC 332: Silva vs. Wang",
+    "upcoming_date": "2026-10-03",
     "recent_event": "UFC Fight Night: Rosas Jr. vs. Barcelos",
-    "recent_date": "2026-09-26",
+    "recent_date": "",
     "data_base_url": "https://raw.githubusercontent.com/zwinship/OctaStats_UFC_Model_V2/main",
     "stats": {
       "analysis_date": "2026-09-27T16:29:37.382447",
@@ -350,5 +350,5 @@
       }
     }
   },
-  "last_updated": "2026-09-27T16:29:35.223852"
+  "last_updated": "2026-10-02T21:09:42.404942"
 }
