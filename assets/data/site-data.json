@@ -1,9 +1,9 @@
 {
   "v2": {
-    "upcoming_event": "UFC 332: Silva vs. Wang",
-    "upcoming_date": "2026-10-03",
+    "upcoming_event": "UFC Fight Night: Allen vs. Duncan",
+    "upcoming_date": "2026-10-10",
     "recent_event": "UFC 332: Silva vs. Wang",
-    "recent_date": "2026-10-03",
+    "recent_date": "",
     "data_base_url": "https://raw.githubusercontent.com/zwinship/OctaStats_UFC_Model_V2/main",
     "stats": {
       "analysis_date": "2026-10-04T16:31:09.579245",
@@ -360,5 +360,5 @@
       }
     }
   },
-  "last_updated": "2026-10-04T16:31:07.322118"
+  "last_updated": "2026-10-09T21:28:38.895391"
 }
