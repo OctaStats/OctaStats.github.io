@@ -1,9 +1,9 @@
 {
   "v2": {
-    "upcoming_event": "UFC Fight Night: Allen vs. Duncan",
-    "upcoming_date": "2026-10-10",
+    "upcoming_event": "UFC Fight Night: Buckley vs. Malott",
+    "upcoming_date": "2026-10-17",
     "recent_event": "UFC Fight Night: Allen vs. Duncan",
-    "recent_date": "2026-10-10",
+    "recent_date": "",
     "data_base_url": "https://raw.githubusercontent.com/zwinship/OctaStats_UFC_Model_V2/main",
     "stats": {
       "analysis_date": "2026-10-11T17:24:43.182208",
@@ -360,5 +360,5 @@
       }
     }
   },
-  "last_updated": "2026-10-11T17:24:40.581466"
+  "last_updated": "2026-10-16T19:48:44.260301"
 }
