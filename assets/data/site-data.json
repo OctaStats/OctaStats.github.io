@@ -1,7 +1,7 @@
 {
   "v2": {
-    "upcoming_event": "UFC Fight Night: Buckley vs. Malott",
-    "upcoming_date": "2026-10-17",
+    "upcoming_event": "UFC 333: Volkanovski vs. Evloev",
+    "upcoming_date": "2026-10-24",
     "recent_event": "UFC Fight Night: Buckley vs. Malott",
     "recent_date": "2026-10-17",
     "data_base_url": "https://raw.githubusercontent.com/zwinship/OctaStats_UFC_Model_V2/main",
@@ -360,5 +360,5 @@
       }
     }
   },
-  "last_updated": "2026-10-18T15:28:00.487557"
+  "last_updated": "2026-10-23T20:23:40.576518"
 }
