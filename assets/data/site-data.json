@@ -1,7 +1,7 @@
 {
   "v2": {
-    "upcoming_event": "UFC 333: Volkanovski vs. Evloev",
-    "upcoming_date": "2026-10-24",
+    "upcoming_event": "UFC Fight Night: Moicano vs. Nolan",
+    "upcoming_date": "2026-10-31",
     "recent_event": "UFC 333: Volkanovski vs. Evloev",
     "recent_date": "2026-10-24",
     "data_base_url": "https://raw.githubusercontent.com/zwinship/OctaStats_UFC_Model_V2/main",
@@ -374,5 +374,5 @@
       }
     }
   },
-  "last_updated": "2026-10-25T15:37:53.068619"
+  "last_updated": "2026-10-30T21:23:08.218614"
 }
