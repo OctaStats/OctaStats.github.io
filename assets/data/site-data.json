@@ -1,7 +1,7 @@
 {
   "v2": {
-    "upcoming_event": "UFC Fight Night: Moicano vs. Nolan",
-    "upcoming_date": "2026-10-31",
+    "upcoming_event": "UFC Fight Night: Cortes Acosta vs. Walker",
+    "upcoming_date": "2026-11-07",
     "recent_event": "UFC Fight Night: Moicano vs. Nolan",
     "recent_date": "2026-10-31",
     "data_base_url": "https://raw.githubusercontent.com/zwinship/OctaStats_UFC_Model_V2/main",
@@ -384,5 +384,5 @@
       }
     }
   },
-  "last_updated": "2026-11-01T17:41:28.485189"
+  "last_updated": "2026-11-06T21:56:43.361849"
 }
