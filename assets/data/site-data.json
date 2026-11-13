@@ -1,7 +1,7 @@
 {
   "v2": {
-    "upcoming_event": "UFC Fight Night: Cortes Acosta vs. Walker",
-    "upcoming_date": "2026-11-07",
+    "upcoming_event": "UFC 334: Gane vs. Hokit",
+    "upcoming_date": "2026-11-14",
     "recent_event": "UFC Fight Night: Cortes Acosta vs. Walker",
     "recent_date": "2026-11-07",
     "data_base_url": "https://raw.githubusercontent.com/zwinship/OctaStats_UFC_Model_V2/main",
@@ -392,5 +392,5 @@
       }
     }
   },
-  "last_updated": "2026-11-08T17:40:01.123367"
+  "last_updated": "2026-11-13T22:23:16.554608"
 }
