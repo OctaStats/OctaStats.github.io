@@ -1,7 +1,7 @@
 {
   "v2": {
-    "upcoming_event": "UFC 334: Gane vs. Hokit",
-    "upcoming_date": "2026-11-14",
+    "upcoming_event": "UFC Fight Night: Prochazka vs. Stirling",
+    "upcoming_date": "2026-11-21",
     "recent_event": "UFC 334: Gane vs. Hokit",
     "recent_date": "2026-11-14",
     "data_base_url": "https://raw.githubusercontent.com/zwinship/OctaStats_UFC_Model_V2/main",
@@ -398,5 +398,5 @@
       }
     }
   },
-  "last_updated": "2026-11-15T18:31:15.062488"
+  "last_updated": "2026-11-20T22:58:21.761584"
 }
